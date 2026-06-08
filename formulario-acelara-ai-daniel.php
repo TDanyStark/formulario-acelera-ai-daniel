@@ -12,6 +12,8 @@
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       formulario-acelara-ai-daniel
  * Domain Path:       /languages
+ * GitHub Plugin URI: https://github.com/TDanyStark/formulario-acelara-ai-daniel
+ * Primary Branch:    main
  *
  * @package FormularioAcelaraAiDaniel
  */
