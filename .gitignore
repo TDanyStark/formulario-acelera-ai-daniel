@@ -1,0 +1,32 @@
+# Dependencias
+/vendor/
+/node_modules/
+
+# Build / distribución
+/build/
+/dist/
+*.zip
+
+# Entorno y configuración local
+.env
+.env.local
+*.local
+
+# Logs
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores / IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# Caché de PHP
+.phpunit.result.cache
