@@ -18,59 +18,58 @@
  * @package FormularioAcelaraAiDaniel
  */
 
-// Si este archivo se llama directamente, abortar.
+// If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
 /**
- * Versión actual del plugin.
+ * Currently plugin version.
+ * Start at version 1.0.0 and use SemVer - https://semver.org
+ * Rename this for your plugin and update it as you release new versions.
  */
-define( 'FAAD_VERSION', '1.0.0' );
+define( 'FORMULARIO_ACELARA_AI_DANIEL_VERSION', '1.0.0' );
 
 /**
- * Identificador / slug del plugin.
+ * The code that runs during plugin activation.
+ * This action is documented in includes/class-formulario-acelara-ai-daniel-activator.php
  */
-define( 'FAAD_SLUG', 'formulario-acelara-ai-daniel' );
-
-/**
- * Ruta absoluta al directorio del plugin (con barra final).
- */
-define( 'FAAD_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-
-/**
- * URL al directorio del plugin (con barra final).
- */
-define( 'FAAD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-
-/**
- * Ruta al archivo principal del plugin.
- */
-define( 'FAAD_PLUGIN_FILE', __FILE__ );
-
-/**
- * Código que se ejecuta durante la activación del plugin.
- */
-function faad_activate() {
-	// TODO: lógica de activación (crear tablas, opciones por defecto, etc.).
+function activate_formulario_acelara_ai_daniel() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-formulario-acelara-ai-daniel-activator.php';
+	Formulario_Acelara_Ai_Daniel_Activator::activate();
 }
-register_activation_hook( __FILE__, 'faad_activate' );
 
 /**
- * Código que se ejecuta durante la desactivación del plugin.
+ * The code that runs during plugin deactivation.
+ * This action is documented in includes/class-formulario-acelara-ai-daniel-deactivator.php
  */
-function faad_deactivate() {
-	// TODO: lógica de desactivación (limpiar cron, etc.).
+function deactivate_formulario_acelara_ai_daniel() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-formulario-acelara-ai-daniel-deactivator.php';
+	Formulario_Acelara_Ai_Daniel_Deactivator::deactivate();
 }
-register_deactivation_hook( __FILE__, 'faad_deactivate' );
+
+register_activation_hook( __FILE__, 'activate_formulario_acelara_ai_daniel' );
+register_deactivation_hook( __FILE__, 'deactivate_formulario_acelara_ai_daniel' );
 
 /**
- * Carga la clase principal e inicia la ejecución del plugin.
+ * The core plugin class that is used to define internationalization,
+ * admin-specific hooks, and public-facing site hooks.
  */
-function faad_run() {
-	require_once FAAD_PLUGIN_DIR . 'includes/class-faad-plugin.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-formulario-acelara-ai-daniel.php';
 
-	$plugin = new FAAD_Plugin();
+/**
+ * Begins execution of the plugin.
+ *
+ * Since everything within the plugin is registered via hooks,
+ * then kicking off the plugin from this point in the file does
+ * not affect the page life cycle.
+ *
+ * @since    1.0.0
+ */
+function run_formulario_acelara_ai_daniel() {
+
+	$plugin = new Formulario_Acelara_Ai_Daniel();
 	$plugin->run();
+
 }
-faad_run();
+run_formulario_acelara_ai_daniel();
