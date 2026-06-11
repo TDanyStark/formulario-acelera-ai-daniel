@@ -30,3 +30,5 @@ desktop.ini
 
 # Caché de PHP
 .phpunit.result.cache
+
+sfwd-lms/
