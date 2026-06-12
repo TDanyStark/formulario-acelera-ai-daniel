@@ -679,14 +679,23 @@
 				utilsScript: cfg.intlUtilsUrl || '',
 			} );
 
-			// Apply prefill (e.g. "+573042465482") so the library detects
-			// the country (+57 → Colombia) and shows only the national part.
+			// Apply prefill. When it carries an international prefix
+			// ("+573042465482") intl-tel-input detects the country (+57 →
+			// Colombia) and shows only the national part. When it is a bare
+			// national number ("3042465482", e.g. a Woo billing phone saved
+			// without country code) we keep it under the initial country by
+			// dropping it straight into the input.
 			var prefill = state.answers[ q.id ];
 			if ( ! isEmpty( prefill ) ) {
-				try {
-					iti.setNumber( String( prefill ) );
-				} catch ( e ) {
-					input.value = String( prefill );
+				var prefillStr = String( prefill ).trim();
+				if ( 0 === prefillStr.indexOf( '+' ) ) {
+					try {
+						iti.setNumber( prefillStr );
+					} catch ( e ) {
+						input.value = prefillStr;
+					}
+				} else {
+					input.value = prefillStr;
 				}
 			}
 
@@ -709,6 +718,14 @@
 			input.addEventListener( 'countrychange', syncAnswer );
 			// utils.js loads async; capture the formatted number once ready.
 			input.addEventListener( 'change', syncAnswer );
+
+			// Normalize the prefilled value to E.164 immediately so the
+			// stored answer + Next button reflect the country code without
+			// waiting for the user to touch the field.
+			if ( ! isEmpty( input.value ) ) {
+				syncAnswer();
+				refreshNextState();
+			}
 		}
 
 		function renderTextarea( q, wrap ) {
