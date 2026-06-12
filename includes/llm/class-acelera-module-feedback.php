@@ -604,16 +604,12 @@ class Acelera_Module_Feedback {
 			$lines[] = 'Orden personalizado de módulos (con puntaje 0-100): ' . $order_line;
 		}
 
-		$objetivo = self::answer_labels( 'p1_1', isset( $context['answers']['p1_1'] ) ? $context['answers']['p1_1'] : null );
+		$answers_block = self::build_all_answers_block( $context );
 
-		if ( array() !== $objetivo ) {
-			$lines[] = 'Objetivo principal (P1.1): ' . implode( '; ', $objetivo );
-		}
-
-		$situacion = self::answer_labels( 'p5_2', isset( $context['answers']['p5_2'] ) ? $context['answers']['p5_2'] : null );
-
-		if ( array() !== $situacion ) {
-			$lines[] = 'Situación laboral/actividad (P5.2): ' . implode( '; ', $situacion );
+		if ( '' !== $answers_block ) {
+			$lines[] = '';
+			$lines[] = 'Respuestas completas del formulario de diagnóstico:';
+			$lines[] = $answers_block;
 		}
 
 		$active_flags = array();
@@ -665,6 +661,165 @@ class Acelera_Module_Feedback {
 		}
 
 		return implode( ', ', $items );
+
+	}
+
+	/**
+	 * Full, labeled list of every answered question for LLM context.
+	 *
+	 * Iterates the canonical question registry in definition order and emits
+	 * one plain-text line per answered, visible question ("Etiqueta: valor"),
+	 * so the model receives the complete diagnostic — not just a curated
+	 * subset. Type-aware formatting mirrors the CRM note serializer.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  array $context Submission context (with decoded 'answers').
+	 * @return string Newline-joined lines, '' when there are no answers.
+	 */
+	private static function build_all_answers_block( array $context ) {
+
+		if ( empty( $context['answers'] ) || ! is_array( $context['answers'] ) ) {
+			return '';
+		}
+
+		$answers = $context['answers'];
+		$lines   = array();
+
+		foreach ( Acelera_Questions::all() as $question ) {
+
+			if ( ! is_array( $question ) || empty( $question['id'] ) ) {
+				continue;
+			}
+
+			$id = $question['id'];
+
+			if ( 'cv_upload' === $id ) {
+				continue;
+			}
+
+			if ( ! array_key_exists( $id, $answers ) ) {
+				continue;
+			}
+
+			$formatted = self::format_answer_text( $question, $answers[ $id ] );
+
+			if ( '' === $formatted ) {
+				continue;
+			}
+
+			$label   = isset( $question['label'] ) ? (string) $question['label'] : $id;
+			$lines[] = '- ' . $label . ': ' . $formatted;
+		}
+
+		return implode( "\n", $lines );
+
+	}
+
+	/**
+	 * Type-aware plain-text formatting of a single stored answer.
+	 *
+	 * Plain-text counterpart of the CRM note formatter: resolves option
+	 * slugs to Spanish labels, renders the children repeater, scales as
+	 * "n/max" and passes free text through verbatim. No HTML/escaping, since
+	 * the result is sent as the LLM user message.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  array $question Question definition.
+	 * @param  mixed $raw      Stored answer value.
+	 * @return string '' when unrenderable.
+	 */
+	private static function format_answer_text( array $question, $raw ) {
+
+		$type = isset( $question['type'] ) ? (string) $question['type'] : 'text';
+
+		switch ( $type ) {
+
+			case 'single':
+				return self::option_label( $question, (string) $raw );
+
+			case 'multi':
+				$values = is_array( $raw ) ? $raw : array( $raw );
+				$labels = array();
+
+				foreach ( $values as $value ) {
+					$label = self::option_label( $question, (string) $value );
+
+					if ( '' !== $label ) {
+						$labels[] = $label;
+					}
+				}
+
+				return implode( ', ', $labels );
+
+			case 'repeater':
+				if ( ! is_array( $raw ) || array() === $raw ) {
+					return '';
+				}
+
+				$rows = array();
+
+				foreach ( $raw as $item ) {
+					if ( ! is_array( $item ) ) {
+						continue;
+					}
+
+					$nombre  = isset( $item['nombre'] ) ? (string) $item['nombre'] : '';
+					$edad    = isset( $item['edad'] ) ? (int) $item['edad'] : 0;
+					$estudia = ( isset( $item['estudia'] ) && 'si' === $item['estudia'] ) ? 'Sí' : 'No';
+
+					$rows[] = sprintf( '%s (%d años, estudia: %s)', $nombre, $edad, $estudia );
+				}
+
+				return implode( '; ', $rows );
+
+			case 'scale':
+				$max = isset( $question['max'] ) ? (int) $question['max'] : 5;
+
+				return (int) $raw . '/' . $max;
+
+			case 'file':
+				return (string) $raw;
+
+			default:
+				// text | textarea | email | tel | date.
+				if ( is_array( $raw ) ) {
+					return implode( ', ', array_map( 'strval', $raw ) );
+				}
+
+				return (string) $raw;
+		}
+
+	}
+
+	/**
+	 * Resolve an option value to its Spanish label.
+	 *
+	 * Falls back to the raw value when the option is unknown so no answer is
+	 * silently lost.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  array  $question Question definition (with 'options').
+	 * @param  string $value    Stored option value.
+	 * @return string
+	 */
+	private static function option_label( array $question, $value ) {
+
+		if ( '' === (string) $value ) {
+			return '';
+		}
+
+		if ( ! empty( $question['options'] ) && is_array( $question['options'] ) ) {
+			foreach ( $question['options'] as $option ) {
+				if ( isset( $option['value'] ) && (string) $option['value'] === (string) $value ) {
+					return isset( $option['label'] ) ? (string) $option['label'] : (string) $value;
+				}
+			}
+		}
+
+		return (string) $value;
 
 	}
 
