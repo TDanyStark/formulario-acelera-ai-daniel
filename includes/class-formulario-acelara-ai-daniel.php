@@ -150,6 +150,42 @@ class Formulario_Acelara_Ai_Daniel {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-acelera-template-loader.php';
 
+		/**
+		 * Diagnostic form (Fase 4 — Part A): hardcoded question definitions
+		 * with the conditional engine and server-side validation.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/form/class-acelera-questions.php';
+
+		/**
+		 * Diagnostic form (Fase 4 — Part A): pure rule-based scoring engine
+		 * (route scores 0–100, personalized module order, flags).
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/form/class-acelera-scoring.php';
+
+		/**
+		 * Diagnostic form (Fase 4 — Part A): result email (called explicitly
+		 * from the /submit handler, no hooks).
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/form/class-acelera-email.php';
+
+		/**
+		 * Diagnostic form (Fase 4 — Part B): per-user module renumbering
+		 * (user_meta order/labels) + sidebar reordering and title filters.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/form/class-acelera-renaming.php';
+
+		/**
+		 * Diagnostic form (Fase 4 — Part B): REST endpoints (acelera/v1 —
+		 * submit, upload-cv, reset, result).
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/form/class-acelera-rest.php';
+
+		/**
+		 * Diagnostic form (Fase 4 — Part B): [acelera_form] shortcode with
+		 * the form / result / logged-out states and asset enqueueing.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/form/class-acelera-form-shortcode.php';
+
 		$this->loader = new Formulario_Acelara_Ai_Daniel_Loader();
 
 	}
@@ -236,6 +272,28 @@ class Formulario_Acelara_Ai_Daniel {
 		$plugin_template_loader = new Acelera_Template_Loader();
 
 		$this->loader->add_filter( 'learndash_template', $plugin_template_loader, 'filter_template', 999, 5 );
+
+		// Diagnostic form (Fase 4 — Part B). The whole feature set stays
+		// inside the LEARNDASH_VERSION guard: the plugin is LD-specific
+		// (submit marks lesson 16246 complete, links point to LD lessons)
+		// and the admin notice above already explains the requirement.
+
+		// [acelera_form] shortcode (lesson 16246 content).
+		$plugin_shortcode = new Acelera_Form_Shortcode( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'init', $plugin_shortcode, 'register_shortcode' );
+
+		// REST endpoints acelera/v1 (submit / upload-cv / reset / result).
+		$plugin_rest = new Acelera_Rest();
+
+		$this->loader->add_action( 'rest_api_init', $plugin_rest, 'register_routes' );
+
+		// Per-user renumbering: sidebar section headings (Fase 3 filter)
+		// and defensive "Módulo X" lesson-title renumbering.
+		$plugin_renaming = new Acelera_Renaming();
+
+		$this->loader->add_filter( 'acelera_section_title', $plugin_renaming, 'filter_section_title', 10, 2 );
+		$this->loader->add_filter( 'the_title', $plugin_renaming, 'filter_the_title', 10, 2 );
 
 	}
 

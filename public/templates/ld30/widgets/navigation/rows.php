@@ -16,6 +16,12 @@
  *   (grid-template-rows collapse technique, see acelera-accordion.css).
  *   Non-collapsible sections (Bienvenida, Módulo 1, unmapped) keep LD's
  *   stock sibling DOM untouched.
+ * - Fase 4: lesson rows are reordered per the current user's personalized
+ *   module order (Acelera_Renaming::reorder_lesson_rows). Rule: Bienvenida
+ *   always first, unmapped lessons next (original relative order), then
+ *   the modules in the user's order. No active submission → natural order.
+ *   Section headings stay attached to each module's first lesson, and the
+ *   accordion keys by section ID/module (order-independent).
  *
  * @since 1.0.0
  *
@@ -27,6 +33,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! empty( $lessons ) ) :
+
+	// ACELERA (Fase 4): render the sections in the user's personalized
+	// module order. No-op while the user has no active submission.
+	if ( class_exists( 'Acelera_Renaming' ) && is_user_logged_in() ) {
+		$acelera_user_order = Acelera_Renaming::get_user_order( get_current_user_id() );
+
+		if ( array() !== $acelera_user_order ) {
+			$lessons = Acelera_Renaming::reorder_lesson_rows( $lessons, $acelera_user_order );
+		}
+	}
 
 	$sections = learndash_30_get_course_sections( $course_id );
 	$i        = 0;

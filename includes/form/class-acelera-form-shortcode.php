@@ -1,0 +1,286 @@
+<?php
+
+/**
+ * [acelera_form] shortcode for the ACELERA diagnostic form (Fase 4.1).
+ *
+ * @link       https://danielamado.com
+ * @since      1.0.0
+ *
+ * @package    Formulario_Acelara_Ai_Daniel
+ * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
+ */
+
+/**
+ * Renders the diagnostic form (or the result screen) inside lesson 16246.
+ *
+ * States, resolved via Acelera_Submissions_Repo::get_active_for_user():
+ * 1. Not logged in → notice (edge case; LD already requires login).
+ * 2. No active submission → empty app container + noscript fallback; the
+ *    step-by-step UI is built entirely by public/js/acelera-form.js.
+ * 3. Active submission → result screen: renumbered module cards linking
+ *    to each module's first lesson + "Resetear" button with confirm modal.
+ *
+ * Assets (acelera-form.js / acelera-form.css) and the localized payload
+ * (questions JSON, prefill, REST url + nonce, i18n strings, existing
+ * result) are enqueued ONLY when the shortcode actually renders.
+ *
+ * Registration: `add_shortcode` on `init` through the plugin loader
+ * (matches how the rest of the plugin registers hooks via the loader; no
+ * earlier shortcode precedent existed).
+ *
+ * @since      1.0.0
+ * @package    Formulario_Acelara_Ai_Daniel
+ * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
+ * @author     Daniel Amado <daniel.amadove@gmail.com>
+ */
+class Acelera_Form_Shortcode {
+
+	/**
+	 * Shortcode tag.
+	 *
+	 * @since 1.0.0
+	 * @var   string
+	 */
+	const TAG = 'acelera_form';
+
+	/**
+	 * The ID of this plugin (asset handle prefix).
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $plugin_name
+	 */
+	private $plugin_name;
+
+	/**
+	 * The version of this plugin (asset cache busting).
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $version
+	 */
+	private $version;
+
+	/**
+	 * Initialize the class and set its properties.
+	 *
+	 * @since    1.0.0
+	 * @param    string $plugin_name The name of the plugin.
+	 * @param    string $version     The version of this plugin.
+	 */
+	public function __construct( $plugin_name, $version ) {
+
+		$this->plugin_name = $plugin_name;
+		$this->version     = $version;
+
+	}
+
+	/**
+	 * Register the shortcode. Hooked to `init` through the loader.
+	 *
+	 * @since  1.0.0
+	 * @return void
+	 */
+	public function register_shortcode() {
+
+		add_shortcode( self::TAG, array( $this, 'render' ) );
+
+	}
+
+	/**
+	 * Shortcode callback.
+	 *
+	 * @since  1.0.0
+	 * @param  array|string $atts Shortcode attributes (unused).
+	 * @return string Markup.
+	 */
+	public function render( $atts = array() ) {
+
+		// State 1 — not logged in (edge case, LD requires login here).
+		if ( ! is_user_logged_in() ) {
+			return sprintf(
+				'<div class="acelera-form acelera-form--notice"><p>%s</p></div>',
+				esc_html__( 'Debes iniciar sesión para completar el formulario de diagnóstico.', 'formulario-acelara-ai-daniel' )
+			);
+		}
+
+		$user_id = get_current_user_id();
+		$repo    = new Acelera_Submissions_Repo();
+		$active  = $repo->get_active_for_user( $user_id );
+
+		$this->enqueue_assets( $active );
+
+		// State 3 — active submission: result screen.
+		if ( $active ) {
+			return $this->render_result_screen( $active );
+		}
+
+		// State 2 — no active submission: JS-driven step form.
+		return $this->render_form_container();
+
+	}
+
+	/**
+	 * Enqueue the form assets + localized payload (render time only).
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  object|null $active Active submission row or null.
+	 * @return void
+	 */
+	private function enqueue_assets( $active ) {
+
+		$handle = $this->plugin_name . '-form';
+		$base   = plugin_dir_url( dirname( __FILE__, 2 ) ) . 'public/';
+
+		wp_enqueue_style( $handle, $base . 'css/acelera-form.css', array(), $this->version, 'all' );
+		wp_enqueue_script( $handle, $base . 'js/acelera-form.js', array(), $this->version, true );
+
+		$user = wp_get_current_user();
+
+		$result = null;
+
+		if ( $active ) {
+			$scores = json_decode( (string) $active->scores, true );
+			$flags  = json_decode( (string) $active->flags, true );
+
+			$result = array(
+				'module_order' => Acelera_Renaming::sanitize_order( (string) $active->module_order ),
+				'modules'      => Acelera_Renaming::module_items( (string) $active->module_order ),
+				'scores'       => is_array( $scores ) ? $scores : array(),
+				'flags'        => is_array( $flags ) ? $flags : array(),
+			);
+		}
+
+		wp_localize_script(
+			$handle,
+			'aceleraForm',
+			array(
+				'restUrl' => esc_url_raw( rest_url( 'acelera/v1/' ) ),
+				'nonce'   => wp_create_nonce( 'wp_rest' ),
+				'userId'  => (int) $user->ID,
+				'state'   => $active ? 'result' : 'form',
+				'result'  => $result,
+				'questions' => Acelera_Questions::all(),
+				'prefill'   => array(
+					'p0_1' => (string) $user->display_name,
+					'p0_2' => (string) $user->user_email,
+				),
+				'strings'   => array(
+					'back'           => __( 'Atrás', 'formulario-acelara-ai-daniel' ),
+					'skip'           => __( 'Omitir', 'formulario-acelara-ai-daniel' ),
+					'next'           => __( 'Siguiente', 'formulario-acelara-ai-daniel' ),
+					'send'           => __( 'Enviar diagnóstico', 'formulario-acelara-ai-daniel' ),
+					'sending'        => __( 'Enviando…', 'formulario-acelara-ai-daniel' ),
+					'required'       => __( 'Esta pregunta es obligatoria.', 'formulario-acelara-ai-daniel' ),
+					'invalidEmail'   => __( 'El correo electrónico no es válido.', 'formulario-acelara-ai-daniel' ),
+					'invalidTel'     => __( 'El teléfono no es válido (mínimo 7 dígitos).', 'formulario-acelara-ai-daniel' ),
+					'invalidDate'    => __( 'La fecha no es válida.', 'formulario-acelara-ai-daniel' ),
+					/* translators: %d: maximum number of selectable options. */
+					'maxOptions'     => __( 'Puedes seleccionar máximo %d opciones.', 'formulario-acelara-ai-daniel' ),
+					'invalidRows'    => __( 'Completa todos los datos de cada hijo (nombre, edad 0–99 y si estudia).', 'formulario-acelara-ai-daniel' ),
+					'addChild'       => __( '+ Agregar hijo', 'formulario-acelara-ai-daniel' ),
+					'removeChild'    => __( 'Quitar', 'formulario-acelara-ai-daniel' ),
+					'childLabel'     => __( 'Hijo/a', 'formulario-acelara-ai-daniel' ),
+					'uploading'      => __( 'Subiendo archivo…', 'formulario-acelara-ai-daniel' ),
+					'uploaded'       => __( 'Archivo subido:', 'formulario-acelara-ai-daniel' ),
+					'uploadError'    => __( 'No se pudo subir el archivo.', 'formulario-acelara-ai-daniel' ),
+					'fileTooBig'     => __( 'El archivo supera el tamaño máximo de 10 MB.', 'formulario-acelara-ai-daniel' ),
+					'fileBadType'    => __( 'Solo se permiten archivos PDF o Word (.pdf, .doc, .docx).', 'formulario-acelara-ai-daniel' ),
+					'removeFile'     => __( 'Quitar archivo', 'formulario-acelara-ai-daniel' ),
+					/* translators: 1: current question number, 2: total visible questions. */
+					'progressOf'     => __( 'Pregunta %1$d de %2$d', 'formulario-acelara-ai-daniel' ),
+					'errorGeneric'   => __( 'Ocurrió un error. Intenta de nuevo.', 'formulario-acelara-ai-daniel' ),
+					'successTitle'   => __( '¡Diagnóstico enviado! Cargando tu resultado…', 'formulario-acelara-ai-daniel' ),
+					'resetting'      => __( 'Reseteando…', 'formulario-acelara-ai-daniel' ),
+					'scaleLow'       => __( 'Nada listo/a', 'formulario-acelara-ai-daniel' ),
+					'scaleHigh'      => __( 'Totalmente listo/a', 'formulario-acelara-ai-daniel' ),
+				),
+			)
+		);
+
+	}
+
+	/**
+	 * State 2 markup — container for the JS step form.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @return string
+	 */
+	private function render_form_container() {
+
+		return sprintf(
+			'<div id="acelera-form" class="acelera-form" data-state="form">' .
+				'<noscript><p class="acelera-form-noscript">%s</p></noscript>' .
+				'<div class="acelera-form-app" aria-live="polite"></div>' .
+			'</div>',
+			esc_html__( 'El formulario de diagnóstico requiere JavaScript. Activa JavaScript en tu navegador para continuar.', 'formulario-acelara-ai-daniel' )
+		);
+
+	}
+
+	/**
+	 * State 3 markup — result screen with renumbered module cards + reset.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  object $active Active submission row.
+	 * @return string
+	 */
+	private function render_result_screen( $active ) {
+
+		$items = Acelera_Renaming::module_items( (string) $active->module_order );
+
+		$cards = '';
+
+		foreach ( $items as $item ) {
+			$cards .= sprintf(
+				'<li class="acelera-form-module-card">' .
+					'<a class="acelera-form-module-link" href="%1$s">' .
+						'<span class="acelera-form-module-number" aria-hidden="true">%2$d</span>' .
+						'<span class="acelera-form-module-label">%3$s</span>' .
+						'<span class="acelera-form-module-arrow" aria-hidden="true">&rarr;</span>' .
+					'</a>' .
+				'</li>',
+				esc_url( $item['url'] ),
+				(int) $item['number'],
+				esc_html( $item['label'] )
+			);
+		}
+
+		return sprintf(
+			'<div id="acelera-form" class="acelera-form acelera-form--result" data-state="result">' .
+				'<div class="acelera-form-result">' .
+					'<h2 class="acelera-form-result-title">%1$s</h2>' .
+					'<p class="acelera-form-result-intro">%2$s</p>' .
+					'<ol class="acelera-form-modules">%3$s</ol>' .
+					'<div class="acelera-form-result-actions">' .
+						'<button type="button" class="acelera-form-btn acelera-form-btn--ghost acelera-form-reset-open">%4$s</button>' .
+					'</div>' .
+				'</div>' .
+				'<div class="acelera-form-modal" role="dialog" aria-modal="true" aria-labelledby="acelera-form-modal-title" hidden>' .
+					'<div class="acelera-form-modal-backdrop" data-acelera-modal-close></div>' .
+					'<div class="acelera-form-modal-box">' .
+						'<h3 id="acelera-form-modal-title">%5$s</h3>' .
+						'<p>%6$s</p>' .
+						'<div class="acelera-form-modal-actions">' .
+							'<button type="button" class="acelera-form-btn acelera-form-btn--ghost acelera-form-reset-cancel" data-acelera-modal-close>%7$s</button>' .
+							'<button type="button" class="acelera-form-btn acelera-form-btn--danger acelera-form-reset-confirm">%8$s</button>' .
+						'</div>' .
+					'</div>' .
+				'</div>' .
+			'</div>',
+			esc_html__( 'Tu orden de ejecución del curso', 'formulario-acelara-ai-daniel' ),
+			esc_html__( 'Según tu diagnóstico, este es el orden recomendado para avanzar por los módulos:', 'formulario-acelara-ai-daniel' ),
+			$cards,
+			esc_html__( 'Resetear diagnóstico', 'formulario-acelara-ai-daniel' ),
+			esc_html__( '¿Resetear tu diagnóstico?', 'formulario-acelara-ai-daniel' ),
+			esc_html__( 'Tu resultado actual se archivará y volverás a responder el formulario desde cero. El orden personalizado de los módulos se restablecerá.', 'formulario-acelara-ai-daniel' ),
+			esc_html__( 'Cancelar', 'formulario-acelara-ai-daniel' ),
+			esc_html__( 'Sí, resetear', 'formulario-acelara-ai-daniel' )
+		);
+
+	}
+
+}
