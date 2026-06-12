@@ -143,6 +143,42 @@
 		} );
 	}
 
+	/**
+	 * Collapse the currently-visible questions into "steps". Consecutive
+	 * questions sharing the same `group` are merged into a single step so
+	 * they render together on one screen (inputs side by side) and are
+	 * validated/advanced/counted as one. Ungrouped questions become their
+	 * own single-question step.
+	 *
+	 * @param  {Array} answers Answers keyed by question id.
+	 * @return {Array<Array>} Array of steps; each step is an array of 1+ questions.
+	 */
+	function visibleSteps( answers ) {
+		var questions = visibleQuestions( answers );
+		var steps     = [];
+		var i         = 0;
+
+		while ( i < questions.length ) {
+			var q = questions[ i ];
+
+			if ( q.group ) {
+				var bucket = [ q ];
+				var j      = i + 1;
+				while ( j < questions.length && questions[ j ].group === q.group ) {
+					bucket.push( questions[ j ] );
+					j++;
+				}
+				steps.push( bucket );
+				i = j;
+			} else {
+				steps.push( [ q ] );
+				i++;
+			}
+		}
+
+		return steps;
+	}
+
 	/* -------------------------------------------------------------------
 	 * Small utils
 	 * ----------------------------------------------------------------- */
@@ -329,52 +365,98 @@
 
 		/* ---------------- render cycle ---------------- */
 
-		function currentVisible() {
-			return visibleQuestions( state.answers );
+		function currentSteps() {
+			return visibleSteps( state.answers );
+		}
+
+		// A step is "skippable" only when every question in it is optional
+		// or explicitly skippable (grouped name fields are required → not skippable).
+		function stepIsSkippable( step ) {
+			return step.every( function ( q ) {
+				return ! q.required || q.skippable;
+			} );
+		}
+
+		// Validate every question of a step; returns the first failure or ok.
+		function validateStep( step ) {
+			for ( var i = 0; i < step.length; i++ ) {
+				var check = validateAnswer( step[ i ], state.answers[ step[ i ].id ] );
+				if ( ! check.ok ) {
+					return check;
+				}
+			}
+			return { ok: true };
 		}
 
 		function render( errorMessage ) {
-			var visible = currentVisible();
+			var steps = currentSteps();
 
 			if ( state.idx < 0 ) {
 				state.idx = 0;
 			}
-			if ( state.idx >= visible.length ) {
-				state.idx = visible.length - 1;
+			if ( state.idx >= steps.length ) {
+				state.idx = steps.length - 1;
 			}
 
-			var q = visible[ state.idx ];
+			var step = steps[ state.idx ];
 
 			app.innerHTML = '';
 
-			if ( ! q ) {
+			if ( ! step ) {
 				return;
 			}
 
-			// Progress bar (% over currently-visible questions).
-			var pct      = Math.round( ( state.idx / visible.length ) * 100 );
+			var isGroup = step.length > 1;
+			var primary = step[ 0 ];
+
+			// Progress bar (% over currently-visible steps).
+			var pct      = Math.round( ( state.idx / steps.length ) * 100 );
 			var progress = el( 'div', 'acelera-form-progress' );
 			var bar      = el( 'div', 'acelera-form-progress-track' );
 			var fill     = el( 'div', 'acelera-form-progress-fill' );
 			fill.style.width = pct + '%';
 			bar.appendChild( fill );
 			progress.appendChild( bar );
-			progress.appendChild( el( 'span', 'acelera-form-progress-text', progressText( state.idx + 1, visible.length ) ) );
+			progress.appendChild( el( 'span', 'acelera-form-progress-text', progressText( state.idx + 1, steps.length ) ) );
 			app.appendChild( progress );
 
 			// Question card.
-			var card  = el( 'div', 'acelera-form-card' );
-			var label = el( 'h3', 'acelera-form-label', q.label );
-			label.id  = 'acelera-q-' + q.id;
-			card.appendChild( label );
+			var card = el( 'div', 'acelera-form-card' );
 
-			if ( q.help ) {
-				card.appendChild( el( 'p', 'acelera-form-help', q.help ) );
+			if ( isGroup ) {
+				// Inline group (e.g. Nombre + Apellido side by side). The
+				// card heading is hidden per-question; instead each input
+				// carries its own short label above it.
+				var groupWrap = el( 'div', 'acelera-form-group' );
+
+				step.forEach( function ( q ) {
+					var fieldWrap = el( 'div', 'acelera-form-group-field' );
+					var fieldLbl  = el( 'label', 'acelera-form-group-label', q.label );
+					fieldLbl.id    = 'acelera-q-' + q.id;
+					fieldLbl.htmlFor = 'acelera-input-' + q.id;
+					fieldWrap.appendChild( fieldLbl );
+
+					var fieldInput = el( 'div', 'acelera-form-input' );
+					renderInput( q, fieldInput );
+					fieldWrap.appendChild( fieldInput );
+
+					groupWrap.appendChild( fieldWrap );
+				} );
+
+				card.appendChild( groupWrap );
+			} else {
+				var label = el( 'h3', 'acelera-form-label', primary.label );
+				label.id  = 'acelera-q-' + primary.id;
+				card.appendChild( label );
+
+				if ( primary.help ) {
+					card.appendChild( el( 'p', 'acelera-form-help', primary.help ) );
+				}
+
+				var inputWrap = el( 'div', 'acelera-form-input' );
+				renderInput( primary, inputWrap );
+				card.appendChild( inputWrap );
 			}
-
-			var inputWrap = el( 'div', 'acelera-form-input' );
-			renderInput( q, inputWrap );
-			card.appendChild( inputWrap );
 
 			var error = el( 'p', 'acelera-form-error' );
 			error.setAttribute( 'role', 'alert' );
@@ -404,32 +486,34 @@
 			var spacer = el( 'div', 'acelera-form-nav-spacer' );
 			nav.appendChild( spacer );
 
-			if ( ! q.required || q.skippable ) {
+			if ( stepIsSkippable( step ) ) {
 				var skip = el( 'button', 'acelera-form-btn acelera-form-btn--ghost acelera-form-skip', cfg.strings.skip );
 				skip.type = 'button';
 				skip.addEventListener( 'click', function () {
-					delete state.answers[ q.id ];
-					advance( q );
+					step.forEach( function ( q ) {
+						delete state.answers[ q.id ];
+					} );
+					advance( step );
 				} );
 				nav.appendChild( skip );
 			}
 
-			var isLast = state.idx === visible.length - 1;
+			var isLast = state.idx === steps.length - 1;
 			var next   = el( 'button', 'acelera-form-btn acelera-form-btn--primary acelera-form-next', isLast ? cfg.strings.send : cfg.strings.next );
 			next.type  = 'button';
 			next.addEventListener( 'click', function () {
-				var check = validateAnswer( q, state.answers[ q.id ] );
+				var check = validateStep( step );
 				if ( ! check.ok ) {
 					showError( check.message );
 					return;
 				}
-				advance( q );
+				advance( step );
 			} );
 			nav.appendChild( next );
 
 			app.appendChild( nav );
 
-			refreshNextState( q );
+			refreshNextState( step );
 			focusFirstField();
 		}
 
@@ -449,24 +533,41 @@
 			}
 		}
 
-		function refreshNextState( q ) {
+		// Resolve the step currently on screen (array of 1+ questions).
+		function activeStep() {
+			var steps = currentSteps();
+			return steps[ state.idx ] || steps[ steps.length - 1 ] || null;
+		}
+
+		function refreshNextState( step ) {
 			var next = app.querySelector( '.acelera-form-next' );
 			if ( ! next ) {
 				return;
 			}
 
-			var raw = state.answers[ q.id ];
+			// Allow callers (e.g. setAnswer) to omit the step.
+			if ( ! step ) {
+				step = activeStep();
+			}
+			if ( ! step ) {
+				return;
+			}
 
 			if ( state.uploading ) {
 				next.disabled = true;
 				return;
 			}
 
-			if ( q.required ) {
-				next.disabled = isEmpty( raw ) || ! validateAnswer( q, raw ).ok;
-			} else {
-				next.disabled = ! isEmpty( raw ) && ! validateAnswer( q, raw ).ok;
-			}
+			// Disabled when ANY question in the step is invalid. Required
+			// questions must be answered; optional ones only need to be
+			// valid when filled.
+			next.disabled = step.some( function ( q ) {
+				var raw = state.answers[ q.id ];
+				if ( q.required ) {
+					return isEmpty( raw ) || ! validateAnswer( q, raw ).ok;
+				}
+				return ! isEmpty( raw ) && ! validateAnswer( q, raw ).ok;
+			} );
 		}
 
 		function focusFirstField() {
@@ -476,24 +577,25 @@
 			}
 		}
 
-		function advance( q ) {
+		function advance( step ) {
 			clearError();
 
-			var visible = currentVisible();
-			var pos     = -1;
+			var primaryId = step[ 0 ].id;
+			var steps     = currentSteps();
+			var pos        = -1;
 
-			for ( var i = 0; i < visible.length; i++ ) {
-				if ( visible[ i ].id === q.id ) {
+			for ( var i = 0; i < steps.length; i++ ) {
+				if ( steps[ i ][ 0 ].id === primaryId ) {
 					pos = i;
 					break;
 				}
 			}
 
 			if ( -1 === pos ) {
-				pos = Math.min( state.idx, visible.length - 1 );
+				pos = Math.min( state.idx, steps.length - 1 );
 			}
 
-			if ( pos >= visible.length - 1 ) {
+			if ( pos >= steps.length - 1 ) {
 				doSubmit();
 				return;
 			}
@@ -511,7 +613,7 @@
 			}
 			saveProgress( state );
 			clearError();
-			refreshNextState( q );
+			refreshNextState();
 		}
 
 		/* ---------------- input renderers ---------------- */
@@ -549,12 +651,64 @@
 			var input = document.createElement( 'input' );
 			input.type      = q.type;
 			input.className = 'acelera-form-field';
+			input.id        = 'acelera-input-' + q.id;
 			input.value     = state.answers[ q.id ] || '';
 			input.setAttribute( 'aria-labelledby', 'acelera-q-' + q.id );
+
+			if ( 'tel' === q.type && window.intlTelInput ) {
+				renderTelInput( q, input, wrap );
+				return;
+			}
+
 			input.addEventListener( 'input', function () {
 				setAnswer( q, input.value );
 			} );
 			wrap.appendChild( input );
+		}
+
+		// Phone input enhanced with intl-tel-input (country flag dropdown).
+		// On each render the DOM is recreated, so we initialize a fresh
+		// instance here and keep it in a render-local closure (no leaks).
+		function renderTelInput( q, input, wrap ) {
+			wrap.appendChild( input );
+
+			var iti = window.intlTelInput( input, {
+				initialCountry: 'co',
+				preferredCountries: [ 'co', 'us', 'mx', 've', 'ar', 'es' ],
+				separateDialCode: true,
+				utilsScript: cfg.intlUtilsUrl || '',
+			} );
+
+			// Apply prefill (e.g. "+573042465482") so the library detects
+			// the country (+57 → Colombia) and shows only the national part.
+			var prefill = state.answers[ q.id ];
+			if ( ! isEmpty( prefill ) ) {
+				try {
+					iti.setNumber( String( prefill ) );
+				} catch ( e ) {
+					input.value = String( prefill );
+				}
+			}
+
+			function syncAnswer() {
+				var value = '';
+				try {
+					value = iti.getNumber(); // E.164, e.g. +573042465482.
+				} catch ( e ) {
+					value = '';
+				}
+				// utils.js may still be loading → getNumber() empty; fall
+				// back to the raw input so the answer is never lost.
+				if ( isEmpty( value ) ) {
+					value = input.value;
+				}
+				setAnswer( q, value );
+			}
+
+			input.addEventListener( 'input', syncAnswer );
+			input.addEventListener( 'countrychange', syncAnswer );
+			// utils.js loads async; capture the formatted number once ready.
+			input.addEventListener( 'change', syncAnswer );
 		}
 
 		function renderTextarea( q, wrap ) {
@@ -831,7 +985,7 @@
 
 					status.textContent = cfg.strings.uploading;
 					state.uploading    = true;
-					refreshNextState( q );
+					refreshNextState();
 
 					var body = new FormData();
 					body.append( 'file', file );
@@ -844,12 +998,12 @@
 							paintUploaded( response.data.url );
 						} else {
 							status.textContent = ( response.data && response.data.message ) ? response.data.message : cfg.strings.uploadError;
-							refreshNextState( q );
+							refreshNextState();
 						}
 					} ).catch( function () {
 						state.uploading    = false;
 						status.textContent = cfg.strings.uploadError;
-						refreshNextState( q );
+						refreshNextState();
 					} );
 				} );
 
@@ -933,13 +1087,18 @@
 		}
 
 		function jumpToFirstError( errors ) {
-			var visible = visibleQuestions( state.answers );
+			var steps = currentSteps();
 
-			for ( var i = 0; i < visible.length; i++ ) {
-				if ( Object.prototype.hasOwnProperty.call( errors, visible[ i ].id ) ) {
-					state.idx = i;
-					render( errors[ visible[ i ].id ] );
-					return;
+			// state.idx is a STEP index; find the first step that contains
+			// any question with a server-reported error.
+			for ( var i = 0; i < steps.length; i++ ) {
+				for ( var j = 0; j < steps[ i ].length; j++ ) {
+					var qid = steps[ i ][ j ].id;
+					if ( Object.prototype.hasOwnProperty.call( errors, qid ) ) {
+						state.idx = i;
+						render( errors[ qid ] );
+						return;
+					}
 				}
 			}
 

@@ -24,6 +24,16 @@
 	line-height: 1.5;
 }
 
+/* The step form lives inside .acelera-form-app. A min-height keeps the
+ * layout (and the nav buttons) from jumping as questions of different
+ * heights swap in/out. The result screen does NOT use this container, so
+ * it is unaffected. */
+.acelera-form-app {
+	display: flex;
+	flex-direction: column;
+	min-height: 420px;
+}
+
 .acelera-form-noscript,
 .acelera-form--notice p {
 	padding: 16px;
@@ -117,6 +127,38 @@
 	background: #fff;
 	color: var(--acelera-form-text);
 	box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------------
+ * Inline question group (e.g. Nombre + Apellido side by side)
+ * ------------------------------------------------------------------- */
+
+.acelera-form-group {
+	display: flex;
+	gap: 12px;
+}
+
+.acelera-form-group-field {
+	flex: 1;
+}
+
+.acelera-form-group-label {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 13px;
+	color: var(--acelera-form-muted);
+}
+
+/* ---------------------------------------------------------------------
+ * intl-tel-input integration (phone field with country flag)
+ * ------------------------------------------------------------------- */
+
+.acelera-form-input .iti {
+	width: 100%;
+}
+
+.acelera-form-input .iti input.acelera-form-field {
+	width: 100%;
 }
 
 .acelera-form-field:focus {
@@ -476,5 +518,19 @@
 
 	.acelera-form-label {
 		font-size: 22px;
+	}
+}
+
+/* ---------------------------------------------------------------------
+ * Small screens
+ * ------------------------------------------------------------------- */
+
+@media (max-width: 480px) {
+	.acelera-form-app {
+		min-height: 360px;
+	}
+
+	.acelera-form-group {
+		flex-direction: column;
 	}
 }
