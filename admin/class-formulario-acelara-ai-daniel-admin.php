@@ -13,8 +13,9 @@
 /**
  * The admin-specific functionality of the plugin.
  *
- * Defines the plugin name, version, and two examples hooks for how to
- * enqueue the admin-specific stylesheet and JavaScript.
+ * Registers the "Curso Acelera" settings page (Settings API, single
+ * serialized option `acelera_settings` with tabs) and enqueues admin
+ * assets only on that page.
  *
  * @package    Formulario_Acelara_Ai_Daniel
  * @subpackage Formulario_Acelara_Ai_Daniel/admin
@@ -41,6 +42,24 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 	private $version;
 
 	/**
+	 * Hook suffix of the plugin settings page, set by add_settings_menu().
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $settings_page_hook    Hook suffix returned by add_menu_page().
+	 */
+	private $settings_page_hook = '';
+
+	/**
+	 * Setting keys that hold API secrets and must never be printed in full.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string[]
+	 */
+	private $api_key_fields = array( 'clientify_api_key', 'anthropic_api_key', 'openai_api_key' );
+
+	/**
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
@@ -57,21 +76,16 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 	/**
 	 * Register the stylesheets for the admin area.
 	 *
+	 * Only enqueued on the plugin settings page.
+	 *
 	 * @since    1.0.0
+	 * @param    string $hook_suffix Current admin page hook suffix.
 	 */
-	public function enqueue_styles() {
+	public function enqueue_styles( $hook_suffix ) {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Formulario_Acelara_Ai_Daniel_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Formulario_Acelara_Ai_Daniel_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+		if ( $hook_suffix !== $this->settings_page_hook ) {
+			return;
+		}
 
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/formulario-acelara-ai-daniel-admin.css', array(), $this->version, 'all' );
 
@@ -80,23 +94,346 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 	/**
 	 * Register the JavaScript for the admin area.
 	 *
+	 * Only enqueued on the plugin settings page.
+	 *
 	 * @since    1.0.0
+	 * @param    string $hook_suffix Current admin page hook suffix.
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts( $hook_suffix ) {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Formulario_Acelara_Ai_Daniel_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Formulario_Acelara_Ai_Daniel_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+		if ( $hook_suffix !== $this->settings_page_hook ) {
+			return;
+		}
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/formulario-acelara-ai-daniel-admin.js', array( 'jquery' ), $this->version, false );
+
+	}
+
+	/**
+	 * Register the "Curso Acelera" top-level menu page.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_settings_menu() {
+
+		$this->settings_page_hook = add_menu_page(
+			__( 'Acelera', 'formulario-acelara-ai-daniel' ),
+			__( 'Curso Acelera', 'formulario-acelara-ai-daniel' ),
+			'manage_options',
+			'acelera-settings',
+			array( $this, 'render_settings_page' ),
+			'dashicons-welcome-learn-more',
+			58
+		);
+
+	}
+
+	/**
+	 * Register the `acelera_settings` option, sections and fields.
+	 *
+	 * One section per tab; each tab uses its own Settings API "page" slug
+	 * (acelera-settings-{tab}) so only the active tab is rendered.
+	 *
+	 * @since    1.0.0
+	 */
+	public function register_settings() {
+
+		register_setting(
+			'acelera_settings',
+			Acelera_Settings::OPTION_NAME,
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( $this, 'sanitize_settings' ),
+			)
+		);
+
+		// --- Tab: Clientify ---------------------------------------------.
+		add_settings_section(
+			'acelera_section_clientify',
+			__( 'Integración con Clientify', 'formulario-acelara-ai-daniel' ),
+			'__return_false',
+			'acelera-settings-clientify'
+		);
+
+		$this->add_field( 'clientify_api_key', __( 'API Key de Clientify', 'formulario-acelara-ai-daniel' ), 'clientify', 'api_key' );
+		$this->add_field( 'clientify_owner', __( 'Owner (email)', 'formulario-acelara-ai-daniel' ), 'clientify', 'text', array(
+			'description' => __( 'Email del propietario asignado a los contactos creados.', 'formulario-acelara-ai-daniel' ),
+		) );
+		$this->add_field( 'clientify_tags', __( 'Tags', 'formulario-acelara-ai-daniel' ), 'clientify', 'text', array(
+			'description' => __( 'Tags separados por comas que se aplican a los contactos.', 'formulario-acelara-ai-daniel' ),
+		) );
+
+		// --- Tab: LLM -----------------------------------------------------.
+		add_settings_section(
+			'acelera_section_llm',
+			__( 'Proveedor LLM (feedback por módulo)', 'formulario-acelara-ai-daniel' ),
+			'__return_false',
+			'acelera-settings-llm'
+		);
+
+		$this->add_field( 'llm_provider', __( 'Proveedor', 'formulario-acelara-ai-daniel' ), 'llm', 'select', array(
+			'options' => array(
+				'claude'  => 'Claude (Anthropic)',
+				'chatgpt' => 'ChatGPT (OpenAI)',
+			),
+		) );
+		$this->add_field( 'anthropic_api_key', __( 'API Key de Anthropic', 'formulario-acelara-ai-daniel' ), 'llm', 'api_key' );
+		$this->add_field( 'openai_api_key', __( 'API Key de OpenAI', 'formulario-acelara-ai-daniel' ), 'llm', 'api_key' );
+		$this->add_field( 'llm_model', __( 'Modelo', 'formulario-acelara-ai-daniel' ), 'llm', 'text', array(
+			'description' => __( 'Identificador del modelo, p. ej. claude-sonnet-4-20250514 o gpt-4o.', 'formulario-acelara-ai-daniel' ),
+		) );
+
+		// --- Tab: Prompts ---------------------------------------------------.
+		add_settings_section(
+			'acelera_section_prompts',
+			__( 'Prompts por módulo', 'formulario-acelara-ai-daniel' ),
+			'__return_false',
+			'acelera-settings-prompts'
+		);
+
+		foreach ( Acelera_Course_Map::modules() as $key => $module ) {
+			$this->add_field(
+				'prompt_' . $key,
+				sprintf( '%s — %s', strtoupper( $key ), $module['label'] ),
+				'prompts',
+				'textarea'
+			);
+		}
+
+		// --- Tab: Email -----------------------------------------------------.
+		add_settings_section(
+			'acelera_section_email',
+			__( 'Email de resultado', 'formulario-acelara-ai-daniel' ),
+			'__return_false',
+			'acelera-settings-email'
+		);
+
+		$this->add_field( 'email_subject', __( 'Asunto', 'formulario-acelara-ai-daniel' ), 'email', 'text' );
+		$this->add_field( 'email_from_name', __( 'Nombre del remitente', 'formulario-acelara-ai-daniel' ), 'email', 'text' );
+
+	}
+
+	/**
+	 * Sanitize the submitted settings.
+	 *
+	 * Each tab submits only its own fields, so the result is merged over
+	 * the previously stored option. API key fields keep their stored value
+	 * when the submitted value is the masked placeholder.
+	 *
+	 * @since    1.0.0
+	 * @param    array $input Raw submitted values.
+	 * @return   array Sanitized full settings array.
+	 */
+	public function sanitize_settings( $input ) {
+
+		$existing = get_option( Acelera_Settings::OPTION_NAME, array() );
+
+		if ( ! is_array( $existing ) ) {
+			$existing = array();
+		}
+
+		if ( ! is_array( $input ) ) {
+			return $existing;
+		}
+
+		$output = $existing;
+
+		// API keys: keep the stored value when the masked placeholder comes back.
+		foreach ( $this->api_key_fields as $key ) {
+			if ( ! isset( $input[ $key ] ) ) {
+				continue;
+			}
+
+			$value = trim( (string) $input[ $key ] );
+
+			if ( false !== strpos( $value, "\u{2022}" ) ) {
+				continue; // Masked placeholder submitted: keep stored value.
+			}
+
+			$output[ $key ] = sanitize_text_field( $value );
+		}
+
+		if ( isset( $input['clientify_owner'] ) ) {
+			$output['clientify_owner'] = sanitize_email( $input['clientify_owner'] );
+		}
+
+		if ( isset( $input['clientify_tags'] ) ) {
+			$tags = array_filter( array_map( 'sanitize_text_field', array_map( 'trim', explode( ',', (string) $input['clientify_tags'] ) ) ) );
+
+			$output['clientify_tags'] = implode( ', ', $tags );
+		}
+
+		if ( isset( $input['llm_provider'] ) ) {
+			$output['llm_provider'] = in_array( $input['llm_provider'], array( 'claude', 'chatgpt' ), true ) ? $input['llm_provider'] : 'claude';
+		}
+
+		if ( isset( $input['llm_model'] ) ) {
+			$output['llm_model'] = sanitize_text_field( $input['llm_model'] );
+		}
+
+		foreach ( array_keys( Acelera_Course_Map::modules() ) as $module_key ) {
+			$prompt_key = 'prompt_' . $module_key;
+
+			if ( isset( $input[ $prompt_key ] ) ) {
+				$output[ $prompt_key ] = sanitize_textarea_field( $input[ $prompt_key ] );
+			}
+		}
+
+		if ( isset( $input['email_subject'] ) ) {
+			$output['email_subject'] = sanitize_text_field( $input['email_subject'] );
+		}
+
+		if ( isset( $input['email_from_name'] ) ) {
+			$output['email_from_name'] = sanitize_text_field( $input['email_from_name'] );
+		}
+
+		return $output;
+
+	}
+
+	/**
+	 * Render the settings page (delegates to the admin partial).
+	 *
+	 * @since    1.0.0
+	 */
+	public function render_settings_page() {
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$tabs = array(
+			'clientify' => __( 'Clientify', 'formulario-acelara-ai-daniel' ),
+			'llm'       => __( 'LLM', 'formulario-acelara-ai-daniel' ),
+			'prompts'   => __( 'Prompts', 'formulario-acelara-ai-daniel' ),
+			'email'     => __( 'Email', 'formulario-acelara-ai-daniel' ),
+		);
+
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'clientify'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( ! isset( $tabs[ $active_tab ] ) ) {
+			$active_tab = 'clientify';
+		}
+
+		include plugin_dir_path( __FILE__ ) . 'partials/formulario-acelara-ai-daniel-admin-display.php';
+
+	}
+
+	/**
+	 * Render a settings field.
+	 *
+	 * Generic callback for every field registered via add_field().
+	 *
+	 * @since    1.0.0
+	 * @param    array $args Field arguments (key, type, options, description).
+	 */
+	public function render_field( $args ) {
+
+		$key   = $args['key'];
+		$type  = $args['type'];
+		$value = Acelera_Settings::get( $key );
+		$name  = Acelera_Settings::OPTION_NAME . '[' . $key . ']';
+
+		switch ( $type ) {
+
+			case 'api_key':
+				printf(
+					'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text" autocomplete="off" />',
+					esc_attr( $key ),
+					esc_attr( $name ),
+					esc_attr( $this->mask_api_key( $value ) )
+				);
+				echo '<p class="description">' . esc_html__( 'Se muestran solo los últimos 4 caracteres. Pegá una clave nueva para reemplazarla.', 'formulario-acelara-ai-daniel' ) . '</p>';
+				break;
+
+			case 'select':
+				printf( '<select id="%1$s" name="%2$s">', esc_attr( $key ), esc_attr( $name ) );
+				foreach ( $args['options'] as $option_value => $option_label ) {
+					printf(
+						'<option value="%1$s" %2$s>%3$s</option>',
+						esc_attr( $option_value ),
+						selected( $value, $option_value, false ),
+						esc_html( $option_label )
+					);
+				}
+				echo '</select>';
+				break;
+
+			case 'textarea':
+				printf(
+					'<textarea id="%1$s" name="%2$s" rows="6" class="large-text code">%3$s</textarea>',
+					esc_attr( $key ),
+					esc_attr( $name ),
+					esc_textarea( $value )
+				);
+				break;
+
+			case 'text':
+			default:
+				printf(
+					'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text" />',
+					esc_attr( $key ),
+					esc_attr( $name ),
+					esc_attr( $value )
+				);
+				break;
+		}
+
+		if ( ! empty( $args['description'] ) && 'api_key' !== $type ) {
+			echo '<p class="description">' . esc_html( $args['description'] ) . '</p>';
+		}
+
+	}
+
+	/**
+	 * Mask an API key, leaving only the last 4 characters visible.
+	 *
+	 * @since    1.0.0
+	 * @param    string $value Stored API key.
+	 * @return   string Masked representation, e.g. "••••1234". Empty when no key stored.
+	 */
+	private function mask_api_key( $value ) {
+
+		$value = (string) $value;
+
+		if ( '' === $value ) {
+			return '';
+		}
+
+		$visible = strlen( $value ) > 4 ? substr( $value, -4 ) : '';
+
+		return str_repeat( "\u{2022}", 4 ) . $visible;
+
+	}
+
+	/**
+	 * Helper to register a settings field on a tab.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @param    string $key   Setting key.
+	 * @param    string $label Field label.
+	 * @param    string $tab   Tab slug (clientify | llm | prompts | email).
+	 * @param    string $type  Field type (text | api_key | select | textarea).
+	 * @param    array  $extra Optional. Extra args (options, description).
+	 */
+	private function add_field( $key, $label, $tab, $type, $extra = array() ) {
+
+		add_settings_field(
+			'acelera_field_' . $key,
+			$label,
+			array( $this, 'render_field' ),
+			'acelera-settings-' . $tab,
+			'acelera_section_' . $tab,
+			array_merge(
+				array(
+					'key'       => $key,
+					'type'      => $type,
+					'label_for' => $key,
+				),
+				$extra
+			)
+		);
 
 	}
 

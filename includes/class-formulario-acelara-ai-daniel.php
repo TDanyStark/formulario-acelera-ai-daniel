@@ -122,6 +122,27 @@ class Formulario_Acelara_Ai_Daniel {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-formulario-acelara-ai-daniel-public.php';
 
+		/**
+		 * Hardcoded map of the ACELERA course (course/lesson IDs, modules, routes).
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/config/class-acelera-course-map.php';
+
+		/**
+		 * Repository for the acelera_form_submissions table.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-acelera-submissions-repo.php';
+
+		/**
+		 * Global read access to the plugin settings (acelera_settings option).
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-acelera-settings.php';
+
+		/**
+		 * Welcome gate state helper (Fase 2): blocks M1–M5 lessons until
+		 * the Bienvenida lessons are completed.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/gate/class-acelera-welcome-gate.php';
+
 		$this->loader = new Formulario_Acelara_Ai_Daniel_Loader();
 
 	}
@@ -157,6 +178,10 @@ class Formulario_Acelara_Ai_Daniel {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
+		// Settings page (menu + Settings API registration).
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_settings_menu' );
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
+
 	}
 
 	/**
@@ -168,10 +193,53 @@ class Formulario_Acelara_Ai_Daniel {
 	 */
 	private function define_public_hooks() {
 
+		// Guard: without LearnDash there is no course to integrate with.
+		// Show an admin notice and skip every public-facing hook.
+		if ( ! defined( 'LEARNDASH_VERSION' ) ) {
+			$this->loader->add_action( 'admin_notices', $this, 'learndash_missing_notice' );
+			return;
+		}
+
 		$plugin_public = new Formulario_Acelara_Ai_Daniel_Public( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+
+		// Welcome gate (Fase 2).
+		// Layer A: hard redirect away from locked M1–M5 lessons.
+		$this->loader->add_action( 'template_redirect', $plugin_public, 'gate_template_redirect' );
+
+		// Gate notice on the redirect destination (Focus Mode + the_content fallback).
+		$this->loader->add_action( 'learndash-focus-content-content-before', $plugin_public, 'gate_render_focus_notice', 10, 2 );
+		$this->loader->add_filter( 'the_content', $plugin_public, 'gate_prepend_notice' );
+
+		// Layer B: LearnDash read-step filter (visual/logical consistency).
+		$this->loader->add_filter( 'learndash_can_user_read_step', $plugin_public, 'gate_can_user_read_step', 10, 3 );
+
+		// Sidebar / course listing signaling: add .acelera-locked to rows.
+		$this->loader->add_filter( 'learndash_lesson_row_class', $plugin_public, 'gate_lesson_row_class', 10, 2 );
+		$this->loader->add_filter( 'learndash-nav-widget-lesson-class', $plugin_public, 'gate_lesson_row_class', 10, 2 );
+
+		// Free-mode compatibility: immediate unlock when a lesson completes.
+		$this->loader->add_action( 'learndash_lesson_completed', $plugin_public, 'gate_on_lesson_completed', 10, 1 );
+
+	}
+
+	/**
+	 * Admin notice shown when LearnDash is not active.
+	 *
+	 * @since    1.0.0
+	 */
+	public function learndash_missing_notice() {
+
+		if ( ! current_user_can( 'activate_plugins' ) ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-error"><p>%s</p></div>',
+			esc_html__( 'Formulario Acelara AI Daniel requiere LearnDash activo. Las funciones públicas del plugin están deshabilitadas hasta que se active LearnDash.', 'formulario-acelara-ai-daniel' )
+		);
 
 	}
 

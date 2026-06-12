@@ -64,6 +64,9 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-formulario-acelara-ai-dani
  * then kicking off the plugin from this point in the file does
  * not affect the page life cycle.
  *
+ * Runs on `plugins_loaded` (priority 5) so the LearnDash guard
+ * (`LEARNDASH_VERSION`) is reliable regardless of plugin load order.
+ *
  * @since    1.0.0
  */
 function run_formulario_acelara_ai_daniel() {
@@ -72,4 +75,4 @@ function run_formulario_acelara_ai_daniel() {
 	$plugin->run();
 
 }
-run_formulario_acelara_ai_daniel();
+add_action( 'plugins_loaded', 'run_formulario_acelara_ai_daniel', 5 );

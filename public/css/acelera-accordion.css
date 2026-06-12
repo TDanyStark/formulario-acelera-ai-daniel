@@ -1,0 +1,100 @@
+/**
+ * ACELERA — sidebar section accordion (Fase 3).
+ *
+ * Pairs with the template overrides in public/templates/ld30/widgets/
+ * navigation/ and public/js/acelera-accordion.js. Built on top of the
+ * stock ld30 .ld-lesson-item-section-heading styles: only collapsible
+ * sections (modules 2-5) receive the .acelera-accordion-heading /
+ * .acelera-section-body hooks; Bienvenida and Módulo 1 keep LD's DOM.
+ *
+ * Collapse animation uses the grid-template-rows 0fr/1fr technique —
+ * no JS measuring, no libraries.
+ */
+
+/* ----------------------------------------------------------------------
+ * Clickable section heading (real <button> inside the heading span).
+ * -------------------------------------------------------------------- */
+
+.acelera-accordion-heading .ld-lesson-section-heading {
+	display: block;
+}
+
+.acelera-section-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5em;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	background: none;
+	border: 0;
+	font: inherit;
+	color: inherit;
+	text-align: inherit;
+	cursor: pointer;
+}
+
+.acelera-section-toggle:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+.acelera-section-toggle .acelera-section-title {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+/* Chevron: points right when collapsed, down when expanded. */
+.acelera-section-toggle .acelera-chevron {
+	flex: 0 0 auto;
+	transform: rotate(-90deg);
+	transition: transform 0.25s ease;
+}
+
+.acelera-accordion-heading.acelera-open .acelera-chevron {
+	transform: rotate(0deg);
+}
+
+/* ----------------------------------------------------------------------
+ * Collapsible section body (wraps the lesson rows of one section).
+ * -------------------------------------------------------------------- */
+
+.acelera-section-body {
+	display: grid;
+	grid-template-rows: 0fr;
+	transition: grid-template-rows 0.25s ease;
+}
+
+.acelera-section-body > .acelera-section-body-inner {
+	overflow: hidden;
+	min-height: 0;
+}
+
+.acelera-section-body.acelera-open {
+	grid-template-rows: 1fr;
+}
+
+/* Keep collapsed content out of the tab order / AT tree. */
+.acelera-section-body:not(.acelera-open) > .acelera-section-body-inner {
+	visibility: hidden;
+}
+
+/* ----------------------------------------------------------------------
+ * Welcome-gate compatibility (Fase 2).
+ *
+ * Locked rows (.acelera-locked, styles in
+ * formulario-acelara-ai-daniel-public.css) keep working unchanged inside
+ * collapsible bodies; nothing to redeclare here.
+ * -------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+	.acelera-section-body {
+		transition: none;
+	}
+
+	.acelera-section-toggle .acelera-chevron {
+		transition: none;
+	}
+}

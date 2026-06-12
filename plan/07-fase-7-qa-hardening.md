@@ -46,7 +46,7 @@
 - [ ] Test de conexión en admin funciona.
 
 ### Req 5 — Feedback LLM
-- [ ] Primera visita a última clase de cada módulo (16258, 16276, 16282, 16297, 16302) → feedback generado.
+- [ ] Insertar `[acelera_feedback module="m1"]` ... `[acelera_feedback module="m5"]` desde el editor LearnDash en clases elegidas por el admin (antepenúltima, final del módulo o posterior) → primera visita genera feedback del módulo correcto.
 - [ ] Segunda visita → desde caché (verificar en logs que no hay llamada API).
 - [ ] Cambio de provider Claude↔ChatGPT funciona; prompts por módulo respetados; placeholders reemplazados.
 - [ ] Sin API key / API caída → clase se ve normal, sin errores visibles.

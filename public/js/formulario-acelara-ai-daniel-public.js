@@ -2,31 +2,41 @@
 	'use strict';
 
 	/**
-	 * All of the code for your public-facing JavaScript source
-	 * should reside in this file.
+	 * Welcome gate (Fase 2) — front-end signaling.
 	 *
-	 * Note: It has been assumed you will write jQuery code here, so the
-	 * $ function reference has been prepared for usage within the scope
-	 * of this function.
-	 *
-	 * This enables you to define handlers, for when the DOM is ready:
-	 *
-	 * $(function() {
-	 *
-	 * });
-	 *
-	 * When the window is loaded:
-	 *
-	 * $( window ).load(function() {
-	 *
-	 * });
-	 *
-	 * ...and/or other possibilities.
-	 *
-	 * Ideally, it is not considered best practise to attach more than a
-	 * single DOM-ready or window-load handler for a particular page.
-	 * Although scripts in the WordPress core, Plugins and Themes may be
-	 * practising this, we should strive to set a better example in our own work.
+	 * The server already adds the `acelera-locked` class to locked lesson
+	 * rows (filters `learndash_lesson_row_class` and
+	 * `learndash-nav-widget-lesson-class`) and enforces access with a
+	 * template_redirect. This layer only improves UX: it neutralizes the
+	 * row links (href="#"), adds the tooltip, and — as a fallback for any
+	 * LD template that bypasses those filters — marks rows whose
+	 * `ld-lesson-item-{ID}` class matches a locked lesson ID localized in
+	 * `aceleraGate.lockedLessons`.
 	 */
+	$( function() {
+
+		if ( typeof aceleraGate === 'undefined' || ! aceleraGate.lockedLessons || ! aceleraGate.lockedLessons.length ) {
+			return;
+		}
+
+		// Fallback: tag rows by the ld-lesson-item-{ID} class LD prints in
+		// course listings, in case a template missed the PHP filters.
+		$.each( aceleraGate.lockedLessons, function( i, lessonId ) {
+			$( '.ld-lesson-item-' + lessonId ).addClass( 'acelera-locked' );
+		} );
+
+		// Neutralize navigation for every locked row.
+		$( '.acelera-locked' ).each( function() {
+			$( this ).find( 'a' )
+				.attr( 'href', '#' )
+				.attr( 'title', aceleraGate.tooltip )
+				.attr( 'aria-disabled', 'true' )
+				.on( 'click', function( e ) {
+					e.preventDefault();
+					e.stopPropagation();
+				} );
+		} );
+
+	} );
 
 })( jQuery );

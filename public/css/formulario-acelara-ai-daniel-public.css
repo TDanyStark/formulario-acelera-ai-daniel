@@ -2,3 +2,42 @@
  * All of the CSS for your public-facing functionality should be
  * included in this file.
  */
+
+/* ----------------------------------------------------------------------
+ * Welcome gate (Fase 2)
+ * -------------------------------------------------------------------- */
+
+/*
+ * Locked lesson rows (M1–M5 before completing Bienvenida).
+ * The class is injected via the learndash_lesson_row_class and
+ * learndash-nav-widget-lesson-class filters; the JS layer neutralizes
+ * the row links.
+ */
+.acelera-locked {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.acelera-locked a {
+	cursor: not-allowed;
+	pointer-events: auto; /* keep hover so the tooltip (title attr) shows */
+}
+
+/* Lock icon appended to the row title link. */
+.acelera-locked .ld-lesson-item-preview-heading::after,
+.acelera-locked .ld-item-name::after {
+	content: '\1F512'; /* 🔒 */
+	font-size: 0.85em;
+	margin-left: 0.4em;
+}
+
+/* Notice shown on the welcome lesson after a gate redirect. */
+.acelera-gate-notice {
+	margin: 0 0 1.25em;
+	padding: 0.9em 1.2em;
+	border-left: 4px solid #d63638;
+	background: #fcf0f1;
+	color: #3c434a;
+	font-weight: 600;
+	border-radius: 3px;
+}

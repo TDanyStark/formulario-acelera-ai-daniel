@@ -29,3 +29,20 @@
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
+
+global $wpdb;
+
+// Delete plugin options.
+delete_option( 'acelera_settings' );
+delete_option( 'acelera_db_version' );
+
+// Delete every user meta created by the plugin (acelera_ prefix).
+$wpdb->query(
+	$wpdb->prepare(
+		"DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE %s",
+		$wpdb->esc_like( 'acelera_' ) . '%'
+	)
+);
+
+// Drop the form submissions table.
+$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}acelera_form_submissions" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
