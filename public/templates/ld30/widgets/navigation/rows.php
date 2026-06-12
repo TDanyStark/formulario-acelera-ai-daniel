@@ -11,10 +11,10 @@
  *   section) instead of inside lesson-row.php, so collapsible sections can
  *   wrap their lesson rows in a real container. lesson-row.php receives an
  *   empty 'sections' array to suppress its internal heading rendering.
- * - Collapsible sections (modules 2-5 per Acelera_Template_Loader meta)
+ * - Collapsible sections (modules 1-5 per Acelera_Template_Loader meta)
  *   wrap their rows in .acelera-section-body > .acelera-section-body-inner
  *   (grid-template-rows collapse technique, see acelera-accordion.css).
- *   Non-collapsible sections (Bienvenida, Módulo 1, unmapped) keep LD's
+ *   Non-collapsible sections (Bienvenida, unmapped) keep LD's
  *   stock sibling DOM untouched.
  * - Fase 4: lesson rows are reordered per the current user's personalized
  *   module order (Acelera_Renaming::reorder_lesson_rows). Rule: Bienvenida

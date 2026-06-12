@@ -136,9 +136,9 @@ class Acelera_Template_Loader {
 	 * - Module resolved from the FIRST lesson of the section via
 	 *   Acelera_Course_Map::module_for_lesson() — independent from both
 	 *   the section title and the visual order (Fase 4 safe).
-	 * - 'welcome' + 'm1' + unmapped sections: never collapsible, always
+	 * - 'welcome' + unmapped sections: never collapsible, always
 	 *   rendered expanded with LD's stock DOM.
-	 * - 'm2'..'m5': collapsible, closed by default, auto-open when the
+	 * - 'm1'..'m5': collapsible, closed by default, auto-open when the
 	 *   section contains the current lesson.
 	 *
 	 * @since    1.0.0
@@ -168,7 +168,7 @@ class Acelera_Template_Loader {
 		}
 
 		$meta['module']      = Acelera_Course_Map::module_for_lesson( $steps[0] );
-		$meta['collapsible'] = ! in_array( $meta['module'], array( null, 'welcome', 'm1' ), true );
+		$meta['collapsible'] = ! in_array( $meta['module'], array( null, 'welcome' ), true );
 
 		if ( ! $meta['collapsible'] ) {
 			return $meta;

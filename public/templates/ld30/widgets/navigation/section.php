@@ -9,10 +9,10 @@
  * Changes vs original:
  * - The title passes through the `acelera_section_title` filter before
  *   printing (Fase 4 hooks it to renumber module titles per user).
- * - Collapsible sections (modules 2-5) render the title inside a real
+ * - Collapsible sections (modules 1-5) render the title inside a real
  *   <button> (accordion toggle) with aria-expanded / aria-controls; the
  *   matching container is opened by the rows.php override.
- * - Non-collapsible sections (Bienvenida, Módulo 1, unmapped) keep LD's
+ * - Non-collapsible sections (Bienvenida, unmapped) keep LD's
  *   stock markup, title filter aside.
  *
  * All four LD section actions are preserved.

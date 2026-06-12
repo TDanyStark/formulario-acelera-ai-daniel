@@ -186,7 +186,7 @@ class Formulario_Acelera_Ai_Daniel_Public {
 	 *                  natural m1..m5 otherwise). Each item: {key, label,
 	 *                  collapsible} where label is the DISPLAY label
 	 *                  (renumbered per user, or the natural "Módulo N. {tema}").
-	 *                  m1 is never collapsible (always expanded, like LD30).
+	 *                  Only 'welcome' is never collapsible; m1..m5 collapse.
 	 * - lessonModules: permalink path → module key ('welcome' or 'm1'..'m5')
 	 *                  for every welcome + module lesson.
 	 * - lockedPaths:   permalink paths of the lessons currently locked by
@@ -233,7 +233,7 @@ class Formulario_Acelera_Ai_Daniel_Public {
 				'label'       => isset( $labels[ $key ] )
 					? $labels[ $key ]
 					: sprintf( 'Módulo %d. %s', $natural_number, $modules_map[ $key ]['label'] ),
-				'collapsible' => ( 'm1' !== $key ),
+				'collapsible' => ( 'welcome' !== $key ),
 			);
 		}
 
