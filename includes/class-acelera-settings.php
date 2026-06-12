@@ -43,11 +43,15 @@ class Acelera_Settings {
 			'clientify_api_key' => '',
 			'clientify_owner'   => 'info@cafecitoconcata.com',
 			'clientify_tags'    => '',
-			// LLM (Fase 6).
+			// LLM (Fase 6). llm_model intentionally defaults to '' —
+			// empty means "per-provider default" resolved by
+			// Acelera_LLM_Client::resolve_model() (claude-sonnet-4-6 for
+			// Claude, gpt-5 for OpenAI), so switching provider never
+			// leaves a stale model name from the other vendor.
 			'llm_provider'      => 'claude',
 			'anthropic_api_key' => '',
 			'openai_api_key'    => '',
-			'llm_model'         => 'claude-sonnet-4-20250514',
+			'llm_model'         => '',
 			// Prompts (Fase 6).
 			'prompt_m1'         => '',
 			'prompt_m2'         => '',

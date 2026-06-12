@@ -68,6 +68,14 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 	const CLIENTIFY_NONCE_ACTION = 'acelera_clientify_admin';
 
 	/**
+	 * Nonce action for the LLM feedback admin AJAX endpoint (Fase 6.4).
+	 *
+	 * @since    1.0.0
+	 * @var      string
+	 */
+	const LLM_NONCE_ACTION = 'acelera_llm_admin';
+
+	/**
 	 * Setting keys that hold API secrets and must never be printed in full.
 	 *
 	 * @since    1.0.0
@@ -128,12 +136,14 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 			$this->plugin_name,
 			'aceleraAdmin',
 			array(
-				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( self::CLIENTIFY_NONCE_ACTION ),
-				'i18n'    => array(
-					'testing'   => __( 'Probando conexión…', 'formulario-acelara-ai-daniel' ),
-					'resending' => __( 'Reprogramando…', 'formulario-acelara-ai-daniel' ),
-					'genericKo' => __( 'Error inesperado. Revisa la consola del navegador.', 'formulario-acelara-ai-daniel' ),
+				'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
+				'nonce'    => wp_create_nonce( self::CLIENTIFY_NONCE_ACTION ),
+				'llmNonce' => wp_create_nonce( self::LLM_NONCE_ACTION ),
+				'i18n'     => array(
+					'testing'      => __( 'Probando conexión…', 'formulario-acelara-ai-daniel' ),
+					'resending'    => __( 'Reprogramando…', 'formulario-acelara-ai-daniel' ),
+					'regenerating' => __( 'Eliminando feedback cacheado…', 'formulario-acelara-ai-daniel' ),
+					'genericKo'    => __( 'Error inesperado. Revisa la consola del navegador.', 'formulario-acelara-ai-daniel' ),
 				),
 			)
 		);
@@ -230,14 +240,14 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 		$this->add_field( 'anthropic_api_key', __( 'API Key de Anthropic', 'formulario-acelara-ai-daniel' ), 'llm', 'api_key' );
 		$this->add_field( 'openai_api_key', __( 'API Key de OpenAI', 'formulario-acelara-ai-daniel' ), 'llm', 'api_key' );
 		$this->add_field( 'llm_model', __( 'Modelo', 'formulario-acelara-ai-daniel' ), 'llm', 'text', array(
-			'description' => __( 'Identificador del modelo, p. ej. claude-sonnet-4-20250514 o gpt-4o.', 'formulario-acelara-ai-daniel' ),
+			'description' => __( 'Identificador del modelo aplicado al proveedor activo. Déjalo vacío para usar el default del proveedor: claude-sonnet-4-6 (Claude) o gpt-5 (OpenAI). Otros válidos: claude-haiku-4-5, claude-opus-4-6, gpt-4.1-mini, gpt-4o-mini.', 'formulario-acelara-ai-daniel' ),
 		) );
 
 		// --- Tab: Prompts ---------------------------------------------------.
 		add_settings_section(
 			'acelera_section_prompts',
 			__( 'Prompts por módulo', 'formulario-acelara-ai-daniel' ),
-			'__return_false',
+			array( $this, 'render_prompts_section_intro' ),
 			'acelera-settings-prompts'
 		);
 
@@ -551,6 +561,86 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 
 		wp_send_json_success(
 			array( 'message' => __( 'Reenvío programado.', 'formulario-acelara-ai-daniel' ) )
+		);
+
+	}
+
+	/**
+	 * Intro text of the Prompts tab: placeholder documentation (Fase 6.3).
+	 *
+	 * @since    1.0.0
+	 */
+	public function render_prompts_section_intro() {
+
+		echo '<p class="description">' . esc_html__( 'Cada textarea es el prompt de sistema usado para generar el feedback del módulo. Si un prompt queda vacío, NO se genera feedback para ese módulo (el shortcode se oculta).', 'formulario-acelara-ai-daniel' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Placeholders disponibles (reemplazo simple): {nombre} = nombre del alumno; {modulo} = nombre temático del módulo del shortcode; {ruta_principal} = primer módulo del orden personalizado del alumno; {respuestas_resumen} = resumen compacto del diagnóstico (objetivo, situación, orden con puntajes). Los dos últimos quedan vacíos si el alumno aún no completó el formulario.', 'formulario-acelara-ai-daniel' ) . '</p>';
+
+	}
+
+	/**
+	 * AJAX `acelera_llm_regenerate` — delete a user's cached feedback
+	 * (Fase 6.4 support tool).
+	 *
+	 * POST: user (ID or email), module ('m1'..'m5' | 'todos'). The cache
+	 * regenerates on the user's next visit to a page with the shortcode.
+	 *
+	 * @since    1.0.0
+	 */
+	public function ajax_llm_regenerate() {
+
+		check_ajax_referer( self::LLM_NONCE_ACTION, 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error(
+				array( 'message' => __( 'No tienes permisos suficientes.', 'formulario-acelara-ai-daniel' ) ),
+				403
+			);
+		}
+
+		$user_ref = isset( $_POST['user'] ) ? sanitize_text_field( wp_unslash( $_POST['user'] ) ) : '';
+		$module   = isset( $_POST['module'] ) ? sanitize_key( wp_unslash( $_POST['module'] ) ) : 'todos';
+
+		if ( '' === $user_ref ) {
+			wp_send_json_error(
+				array( 'message' => __( 'Indica el ID o email del usuario.', 'formulario-acelara-ai-daniel' ) )
+			);
+		}
+
+		$user = is_numeric( $user_ref )
+			? get_user_by( 'id', (int) $user_ref )
+			: get_user_by( 'email', $user_ref );
+
+		if ( ! $user ) {
+			wp_send_json_error(
+				array( 'message' => __( 'No se encontró ningún usuario con ese ID o email.', 'formulario-acelara-ai-daniel' ) )
+			);
+		}
+
+		$valid = array_keys( Acelera_Course_Map::modules() );
+
+		if ( 'todos' === $module ) {
+			$modules = $valid;
+		} elseif ( in_array( $module, $valid, true ) ) {
+			$modules = array( $module );
+		} else {
+			wp_send_json_error(
+				array( 'message' => __( 'Módulo inválido.', 'formulario-acelara-ai-daniel' ) )
+			);
+
+			return;
+		}
+
+		$deleted = Acelera_Module_Feedback::delete_cache( $user->ID, $modules );
+
+		wp_send_json_success(
+			array(
+				'message' => sprintf(
+					/* translators: 1: number of cache entries deleted, 2: user login. */
+					__( 'Feedback eliminado: %1$d entrada(s) de caché de %2$s. Se regenerará en su próxima visita.', 'formulario-acelara-ai-daniel' ),
+					(int) $deleted,
+					$user->user_login
+				),
+			)
 		);
 
 	}

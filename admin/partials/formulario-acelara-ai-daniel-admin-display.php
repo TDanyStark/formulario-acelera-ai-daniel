@@ -50,4 +50,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span id="acelera-clientify-test-result" aria-live="polite"></span>
 		</p>
 	<?php endif; ?>
+
+	<?php if ( 'llm' === $active_tab ) : ?>
+		<hr>
+		<h2><?php esc_html_e( 'Regenerar feedback (soporte)', 'formulario-acelara-ai-daniel' ); ?></h2>
+		<p class="description">
+			<?php esc_html_e( 'Borra el feedback cacheado de un alumno; se volverá a generar con el LLM en su próxima visita a una clase con el shortcode.', 'formulario-acelara-ai-daniel' ); ?>
+		</p>
+		<p>
+			<label for="acelera-llm-user"><?php esc_html_e( 'Usuario (ID o email)', 'formulario-acelara-ai-daniel' ); ?></label>
+			<input type="text" id="acelera-llm-user" class="regular-text" />
+
+			<label for="acelera-llm-module"><?php esc_html_e( 'Módulo', 'formulario-acelara-ai-daniel' ); ?></label>
+			<select id="acelera-llm-module">
+				<option value="todos"><?php esc_html_e( 'Todos los módulos', 'formulario-acelara-ai-daniel' ); ?></option>
+				<?php foreach ( Acelera_Course_Map::modules() as $module_key => $module_def ) : ?>
+					<option value="<?php echo esc_attr( $module_key ); ?>">
+						<?php echo esc_html( sprintf( '%s — %s', strtoupper( $module_key ), $module_def['label'] ) ); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+
+			<button type="button" class="button" id="acelera-llm-regenerate">
+				<?php esc_html_e( 'Regenerar feedback', 'formulario-acelara-ai-daniel' ); ?>
+			</button>
+			<span id="acelera-llm-regenerate-result" aria-live="polite"></span>
+		</p>
+	<?php endif; ?>
 </div>

@@ -1,0 +1,86 @@
+/**
+ * [acelera_feedback] container styles (Fase 6.2).
+ *
+ * Two states:
+ * - Loading: shimmer skeleton bars + "Generando…" line.
+ * - Ready (.acelera-feedback--ready): revealed feedback card.
+ *
+ * The container is removed from the DOM entirely on silent fallback,
+ * so no "error" state exists by design.
+ */
+
+.acelera-feedback {
+	margin: 1.5em 0;
+	padding: 1.25em 1.5em;
+	border: 1px solid #e2e4e7;
+	border-radius: 8px;
+	background: #fff;
+}
+
+/* --- Skeleton (loading) ------------------------------------------------ */
+
+.acelera-feedback-skeleton {
+	display: block;
+}
+
+.acelera-feedback-skeleton-bar {
+	display: block;
+	height: 12px;
+	margin: 0 0 10px;
+	border-radius: 6px;
+	background: linear-gradient( 90deg, #ececec 25%, #f7f7f7 37%, #ececec 63% );
+	background-size: 400% 100%;
+	animation: acelera-feedback-shimmer 1.4s ease infinite;
+}
+
+.acelera-feedback-skeleton-bar--short {
+	width: 60%;
+}
+
+@keyframes acelera-feedback-shimmer {
+	0% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0 50%;
+	}
+}
+
+@media ( prefers-reduced-motion: reduce ) {
+	.acelera-feedback-skeleton-bar {
+		animation: none;
+	}
+}
+
+.acelera-feedback-loading {
+	margin: 0.5em 0 0;
+	color: #757575;
+	font-size: 0.9em;
+	font-style: italic;
+}
+
+/* --- Revealed card ------------------------------------------------------ */
+
+.acelera-feedback--ready {
+	border-left: 4px solid #2271b1;
+	background: #f8fbfe;
+}
+
+.acelera-feedback-content > p:first-child {
+	margin-top: 0;
+}
+
+.acelera-feedback-content > p:last-child,
+.acelera-feedback-content > ul:last-child {
+	margin-bottom: 0;
+}
+
+.acelera-feedback-content ul {
+	margin: 0.75em 0;
+	padding-left: 1.5em;
+	list-style: disc;
+}
+
+.acelera-feedback-content li {
+	margin-bottom: 0.35em;
+}

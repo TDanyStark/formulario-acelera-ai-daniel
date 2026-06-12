@@ -2,10 +2,11 @@
 	'use strict';
 
 	/**
-	 * Admin behavior for the Curso Acelera pages (Fase 5.3).
+	 * Admin behavior for the Curso Acelera pages (Fase 5.3 / 6.4).
 	 *
 	 * - "Probar conexión" button on the Clientify settings tab.
 	 * - "Reenviar" buttons on the Sumisiones list.
+	 * - "Regenerar feedback" support tool on the LLM settings tab.
 	 *
 	 * Depends on the `aceleraAdmin` object localized by
 	 * Formulario_Acelara_Ai_Daniel_Admin::enqueue_scripts()
@@ -82,6 +83,38 @@
 				} )
 				.fail( function() {
 					renderResult( $result, false, settings.i18n.genericKo );
+					$button.prop( 'disabled', false );
+				} );
+		} );
+
+		// --- LLM: clear a user's cached module feedback (Fase 6.4) ---------.
+		$( document ).on( 'click', '#acelera-llm-regenerate', function() {
+			var $button = $( this );
+			var $result = $( '#acelera-llm-regenerate-result' );
+			var user = $.trim( $( '#acelera-llm-user' ).val() || '' );
+			var module = $( '#acelera-llm-module' ).val() || 'todos';
+
+			$button.prop( 'disabled', true );
+			renderResult( $result, true, settings.i18n.regenerating );
+
+			$.post( settings.ajaxUrl, {
+				action: 'acelera_llm_regenerate',
+				nonce: settings.llmNonce,
+				user: user,
+				module: module
+			} )
+				.done( function( response ) {
+					var ok = !! ( response && response.success );
+					var message = ( response && response.data && response.data.message )
+						? response.data.message
+						: settings.i18n.genericKo;
+
+					renderResult( $result, ok, message );
+				} )
+				.fail( function() {
+					renderResult( $result, false, settings.i18n.genericKo );
+				} )
+				.always( function() {
 					$button.prop( 'disabled', false );
 				} );
 		} );

@@ -193,6 +193,13 @@ class Formulario_Acelara_Ai_Daniel {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/crm/class-acelera-clientify.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/crm/class-acelera-clientify-dispatcher.php';
 
+		/**
+		 * LLM feedback (Fase 6): multi-provider client (Anthropic/OpenAI)
+		 * and the [acelera_feedback] shortcode + REST endpoint + cache.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/llm/class-acelera-llm-client.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/llm/class-acelera-module-feedback.php';
+
 		$this->loader = new Formulario_Acelara_Ai_Daniel_Loader();
 
 	}
@@ -237,6 +244,10 @@ class Formulario_Acelara_Ai_Daniel {
 		// right section for them.
 		$this->loader->add_action( 'wp_ajax_acelera_clientify_test', $plugin_admin, 'ajax_clientify_test' );
 		$this->loader->add_action( 'wp_ajax_acelera_clientify_resend', $plugin_admin, 'ajax_clientify_resend' );
+
+		// LLM feedback support tool (Fase 6.4): clear a user's cached
+		// feedback so it regenerates on their next visit.
+		$this->loader->add_action( 'wp_ajax_acelera_llm_regenerate', $plugin_admin, 'ajax_llm_regenerate' );
 
 	}
 
@@ -323,6 +334,16 @@ class Formulario_Acelara_Ai_Daniel {
 
 		$this->loader->add_action( 'acelera_form_completed', $plugin_clientify_dispatcher, 'on_form_completed', 10, 4 );
 		$this->loader->add_action( Acelera_Clientify_Dispatcher::CRON_HOOK, $plugin_clientify_dispatcher, 'handle_cron', 10, 2 );
+
+		// LLM module feedback (Fase 6): [acelera_feedback module="mX"]
+		// shortcode (placed by the admin inside LD lesson content) and its
+		// GET acelera/v1/feedback/{module} endpoint. Inside the LD guard
+		// like the rest of the public feature set: the shortcode only
+		// lives in LearnDash content of course 16242.
+		$plugin_feedback = new Acelera_Module_Feedback( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'init', $plugin_feedback, 'register_shortcode' );
+		$this->loader->add_action( 'rest_api_init', $plugin_feedback, 'register_routes' );
 
 	}
 
