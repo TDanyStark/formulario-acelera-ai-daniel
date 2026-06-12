@@ -70,13 +70,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</tr>
 				<tr>
 					<td>
-						<code class="acelera-shortcode-code">[acelera_feedback]</code>
-						<button type="button" class="button button-small acelera-copy-shortcode" data-shortcode="[acelera_feedback]">
+						<code class="acelera-shortcode-code">[acelera_feedback module="m1"]</code>
+						<button type="button" class="button button-small acelera-copy-shortcode" data-shortcode='[acelera_feedback module="m1"]'>
 							<?php esc_html_e( 'Copiar', 'formulario-acelera-ai-daniel' ); ?>
 						</button>
 					</td>
 					<td>
-						<?php esc_html_e( 'Feedback personalizado por módulo generado con IA (LLM). Colócalo dentro de la clase/lección de un módulo; tomará automáticamente el módulo según la lección actual y el diagnóstico del alumno.', 'formulario-acelera-ai-daniel' ); ?>
+						<?php esc_html_e( 'Feedback personalizado generado con IA (LLM). Tú eliges el módulo con el atributo module y dónde colocarlo: pega el shortcode en la clase/lección que quieras. El módulo NO se detecta automáticamente: el feedback corresponde al valor que indiques en module ("m1" a "m5").', 'formulario-acelera-ai-daniel' ); ?>
+						<br><br>
+						<?php esc_html_e( 'Shortcode por módulo (clic para copiar):', 'formulario-acelera-ai-daniel' ); ?>
+						<span class="acelera-feedback-module-codes">
+							<?php foreach ( Acelera_Course_Map::modules() as $module_key => $module_def ) : ?>
+								<?php $fb_code = sprintf( '[acelera_feedback module="%s"]', $module_key ); ?>
+								<button type="button" class="button button-small acelera-copy-shortcode" data-shortcode='<?php echo esc_attr( $fb_code ); ?>' title="<?php echo esc_attr( $module_def['label'] ); ?>">
+									<?php echo esc_html( strtoupper( $module_key ) ); ?>
+								</button>
+							<?php endforeach; ?>
+						</span>
 					</td>
 				</tr>
 			</tbody>
