@@ -211,7 +211,7 @@ class Acelera_Questions {
 				'type'      => 'multi',
 				'label'     => '¿Cuál es tu objetivo principal en este momento?',
 				'required'  => true,
-				'max'       => 2,
+				'max'       => 4,
 				'options'   => array(
 					array( 'value' => 'migratorio', 'label' => 'Resolver mi situación migratoria / conseguir una visa' ),
 					array( 'value' => 'familia', 'label' => 'Mudarme con mi familia y establecernos bien (colegios, casa, ciudad)' ),
