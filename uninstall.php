@@ -22,7 +22,7 @@
  * @link       https://https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
+ * @package    Formulario_Acelera_Ai_Daniel
  */
 
 // If uninstall not called from WordPress, then exit.

@@ -33,7 +33,7 @@
  * via module.exports for plain-node unit testing.
  *
  * @since 1.0.0
- * @package Formulario_Acelara_Ai_Daniel
+ * @package Formulario_Acelera_Ai_Daniel
  */
 
 ( function() {

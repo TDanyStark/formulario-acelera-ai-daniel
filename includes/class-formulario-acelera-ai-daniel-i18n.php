@@ -9,8 +9,8 @@
  * @link       https://https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -24,11 +24,11 @@ if ( ! defined( 'WPINC' ) ) {
  * so that it is ready for translation.
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
-class Formulario_Acelara_Ai_Daniel_i18n {
+class Formulario_Acelera_Ai_Daniel_i18n {
 
 
 	/**
@@ -39,7 +39,7 @@ class Formulario_Acelara_Ai_Daniel_i18n {
 	public function load_plugin_textdomain() {
 
 		load_plugin_textdomain(
-			'formulario-acelara-ai-daniel',
+			'formulario-acelera-ai-daniel',
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);

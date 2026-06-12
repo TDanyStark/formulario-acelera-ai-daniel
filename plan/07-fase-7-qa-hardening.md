@@ -62,4 +62,4 @@
 ## 7.4 Entrega
 
 - [ ] Actualizar `README.txt` con descripción real, configuración (settings) y nota de mantenimiento del mapa de IDs.
-- [ ] Bump de versión + commit final etiquetado (el header tiene Git Updater apuntando a `TDanyStark/formulario-acelara-ai-daniel`).
+- [ ] Bump de versión + commit final etiquetado (el header tiene Git Updater apuntando a `TDanyStark/formulario-acelera-ai-daniel`).

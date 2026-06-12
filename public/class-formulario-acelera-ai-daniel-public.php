@@ -6,8 +6,8 @@
  * @link       https://https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/public
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/public
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -20,11 +20,11 @@ if ( ! defined( 'WPINC' ) ) {
  * Enqueues the public assets only inside the ACELERA course (course
  * 16242 or any of its lessons/topics/quizzes).
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/public
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/public
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
-class Formulario_Acelara_Ai_Daniel_Public {
+class Formulario_Acelera_Ai_Daniel_Public {
 
 	/**
 	 * The ID of this plugin.
@@ -103,7 +103,7 @@ class Formulario_Acelara_Ai_Daniel_Public {
 			return;
 		}
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/formulario-acelara-ai-daniel-public.css', array(), $this->asset_version( 'public/css/formulario-acelara-ai-daniel-public.css' ), 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/formulario-acelera-ai-daniel-public.css', array(), $this->asset_version( 'public/css/formulario-acelera-ai-daniel-public.css' ), 'all' );
 
 		// Sidebar accordion styles (Fase 3).
 		wp_enqueue_style( $this->plugin_name . '-accordion', plugin_dir_url( __FILE__ ) . 'css/acelera-accordion.css', array( $this->plugin_name ), $this->asset_version( 'public/css/acelera-accordion.css' ), 'all' );
@@ -123,7 +123,7 @@ class Formulario_Acelara_Ai_Daniel_Public {
 			return;
 		}
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/formulario-acelara-ai-daniel-public.js', array( 'jquery' ), $this->asset_version( 'public/js/formulario-acelara-ai-daniel-public.js' ), false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/formulario-acelera-ai-daniel-public.js', array( 'jquery' ), $this->asset_version( 'public/js/formulario-acelera-ai-daniel-public.js' ), false );
 
 		// Welcome gate data for the front-end (see gate JS in the same file).
 		// Locked lesson IDs are only sent while the gate applies; once the
@@ -141,7 +141,7 @@ class Formulario_Acelara_Ai_Daniel_Public {
 			'aceleraGate',
 			array(
 				'lockedLessons' => $locked_lessons,
-				'tooltip'       => __( 'Completa Bienvenida primero', 'formulario-acelara-ai-daniel' ),
+				'tooltip'       => __( 'Completa Bienvenida primero', 'formulario-acelera-ai-daniel' ),
 			)
 		);
 
@@ -298,8 +298,8 @@ class Formulario_Acelara_Ai_Daniel_Public {
 			'lockedPaths'   => array_values( $locked_paths ),
 			'currentPath'   => $current_path,
 			'strings'       => array(
-				'tooltip'       => __( 'Completa Bienvenida primero', 'formulario-acelara-ai-daniel' ),
-				'toggleSection' => __( 'Mostrar u ocultar las lecciones de la sección', 'formulario-acelara-ai-daniel' ),
+				'tooltip'       => __( 'Completa Bienvenida primero', 'formulario-acelera-ai-daniel' ),
+				'toggleSection' => __( 'Mostrar u ocultar las lecciones de la sección', 'formulario-acelera-ai-daniel' ),
 			),
 		);
 
@@ -336,7 +336,7 @@ class Formulario_Acelara_Ai_Daniel_Public {
 
 	/* ---------------------------------------------------------------------
 	 * Welcome gate (Fase 2) — hooks registered through the loader in
-	 * Formulario_Acelara_Ai_Daniel::define_public_hooks().
+	 * Formulario_Acelera_Ai_Daniel::define_public_hooks().
 	 * ------------------------------------------------------------------- */
 
 	/**
@@ -473,7 +473,7 @@ class Formulario_Acelara_Ai_Daniel_Public {
 
 		return sprintf(
 			'<div class="acelera-gate-notice" role="alert">%s</div>',
-			esc_html__( 'Debes completar el módulo de Bienvenida antes de acceder al resto del curso.', 'formulario-acelara-ai-daniel' )
+			esc_html__( 'Debes completar el módulo de Bienvenida antes de acceder al resto del curso.', 'formulario-acelera-ai-daniel' )
 		);
 
 	}

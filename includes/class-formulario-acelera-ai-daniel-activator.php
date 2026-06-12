@@ -6,8 +6,8 @@
  * @link       https://https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -20,11 +20,11 @@ if ( ! defined( 'WPINC' ) ) {
  * This class defines all code necessary to run during the plugin's activation.
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
-class Formulario_Acelara_Ai_Daniel_Activator {
+class Formulario_Acelera_Ai_Daniel_Activator {
 
 	/**
 	 * Database schema version, stored in the `acelera_db_version` option

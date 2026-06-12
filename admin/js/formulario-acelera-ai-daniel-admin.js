@@ -9,7 +9,7 @@
 	 * - "Regenerar feedback" support tool on the LLM settings tab.
 	 *
 	 * Depends on the `aceleraAdmin` object localized by
-	 * Formulario_Acelara_Ai_Daniel_Admin::enqueue_scripts()
+	 * Formulario_Acelera_Ai_Daniel_Admin::enqueue_scripts()
 	 * ({ ajaxUrl, nonce, i18n }).
 	 */
 

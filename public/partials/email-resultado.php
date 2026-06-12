@@ -12,8 +12,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/public/partials
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/public/partials
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

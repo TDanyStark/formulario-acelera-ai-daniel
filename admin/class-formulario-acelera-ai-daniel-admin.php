@@ -6,8 +6,8 @@
  * @link       https://https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/admin
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/admin
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -21,11 +21,11 @@ if ( ! defined( 'WPINC' ) ) {
  * serialized option `acelera_settings` with tabs) and enqueues admin
  * assets only on that page.
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/admin
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/admin
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
-class Formulario_Acelara_Ai_Daniel_Admin {
+class Formulario_Acelera_Ai_Daniel_Admin {
 
 	/**
 	 * The ID of this plugin.
@@ -136,7 +136,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 			return;
 		}
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/formulario-acelara-ai-daniel-admin.css', array(), $this->asset_version( 'admin/css/formulario-acelara-ai-daniel-admin.css' ), 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/formulario-acelera-ai-daniel-admin.css', array(), $this->asset_version( 'admin/css/formulario-acelera-ai-daniel-admin.css' ), 'all' );
 
 	}
 
@@ -154,7 +154,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 			return;
 		}
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/formulario-acelara-ai-daniel-admin.js', array( 'jquery' ), $this->asset_version( 'admin/js/formulario-acelara-ai-daniel-admin.js' ), false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/formulario-acelera-ai-daniel-admin.js', array( 'jquery' ), $this->asset_version( 'admin/js/formulario-acelera-ai-daniel-admin.js' ), false );
 
 		wp_localize_script(
 			$this->plugin_name,
@@ -164,10 +164,10 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 				'nonce'    => wp_create_nonce( self::CLIENTIFY_NONCE_ACTION ),
 				'llmNonce' => wp_create_nonce( self::LLM_NONCE_ACTION ),
 				'i18n'     => array(
-					'testing'      => __( 'Probando conexión…', 'formulario-acelara-ai-daniel' ),
-					'resending'    => __( 'Reprogramando…', 'formulario-acelara-ai-daniel' ),
-					'regenerating' => __( 'Eliminando feedback cacheado…', 'formulario-acelara-ai-daniel' ),
-					'genericKo'    => __( 'Error inesperado. Revisa la consola del navegador.', 'formulario-acelara-ai-daniel' ),
+					'testing'      => __( 'Probando conexión…', 'formulario-acelera-ai-daniel' ),
+					'resending'    => __( 'Reprogramando…', 'formulario-acelera-ai-daniel' ),
+					'regenerating' => __( 'Eliminando feedback cacheado…', 'formulario-acelera-ai-daniel' ),
+					'genericKo'    => __( 'Error inesperado. Revisa la consola del navegador.', 'formulario-acelera-ai-daniel' ),
 				),
 			)
 		);
@@ -182,8 +182,8 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 	public function add_settings_menu() {
 
 		$this->settings_page_hook = add_menu_page(
-			__( 'Acelera', 'formulario-acelara-ai-daniel' ),
-			__( 'Curso Acelera', 'formulario-acelara-ai-daniel' ),
+			__( 'Acelera', 'formulario-acelera-ai-daniel' ),
+			__( 'Curso Acelera', 'formulario-acelera-ai-daniel' ),
 			'manage_options',
 			'acelera-settings',
 			array( $this, 'render_settings_page' ),
@@ -194,8 +194,8 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 		// Mirror the default WP behavior: a submenu entry for the parent page.
 		add_submenu_page(
 			'acelera-settings',
-			__( 'Ajustes', 'formulario-acelara-ai-daniel' ),
-			__( 'Ajustes', 'formulario-acelara-ai-daniel' ),
+			__( 'Ajustes', 'formulario-acelera-ai-daniel' ),
+			__( 'Ajustes', 'formulario-acelera-ai-daniel' ),
 			'manage_options',
 			'acelera-settings'
 		);
@@ -203,8 +203,8 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 		// Submissions status list (Fase 5.3).
 		$this->submissions_page_hook = add_submenu_page(
 			'acelera-settings',
-			__( 'Sumisiones', 'formulario-acelara-ai-daniel' ),
-			__( 'Sumisiones', 'formulario-acelara-ai-daniel' ),
+			__( 'Sumisiones', 'formulario-acelera-ai-daniel' ),
+			__( 'Sumisiones', 'formulario-acelera-ai-daniel' ),
 			'manage_options',
 			'acelera-submissions',
 			array( $this, 'render_submissions_page' )
@@ -234,43 +234,43 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 		// --- Tab: Clientify ---------------------------------------------.
 		add_settings_section(
 			'acelera_section_clientify',
-			__( 'Integración con Clientify', 'formulario-acelara-ai-daniel' ),
+			__( 'Integración con Clientify', 'formulario-acelera-ai-daniel' ),
 			'__return_false',
 			'acelera-settings-clientify'
 		);
 
-		$this->add_field( 'clientify_api_key', __( 'API Key de Clientify', 'formulario-acelara-ai-daniel' ), 'clientify', 'api_key' );
-		$this->add_field( 'clientify_owner', __( 'Owner (email)', 'formulario-acelara-ai-daniel' ), 'clientify', 'text', array(
-			'description' => __( 'Email del propietario asignado a los contactos creados.', 'formulario-acelara-ai-daniel' ),
+		$this->add_field( 'clientify_api_key', __( 'API Key de Clientify', 'formulario-acelera-ai-daniel' ), 'clientify', 'api_key' );
+		$this->add_field( 'clientify_owner', __( 'Owner (email)', 'formulario-acelera-ai-daniel' ), 'clientify', 'text', array(
+			'description' => __( 'Email del propietario asignado a los contactos creados.', 'formulario-acelera-ai-daniel' ),
 		) );
-		$this->add_field( 'clientify_tags', __( 'Tags', 'formulario-acelara-ai-daniel' ), 'clientify', 'text', array(
-			'description' => __( 'Tags separados por comas que se aplican a los contactos.', 'formulario-acelara-ai-daniel' ),
+		$this->add_field( 'clientify_tags', __( 'Tags', 'formulario-acelera-ai-daniel' ), 'clientify', 'text', array(
+			'description' => __( 'Tags separados por comas que se aplican a los contactos.', 'formulario-acelera-ai-daniel' ),
 		) );
 
 		// --- Tab: LLM -----------------------------------------------------.
 		add_settings_section(
 			'acelera_section_llm',
-			__( 'Proveedor LLM (feedback por módulo)', 'formulario-acelara-ai-daniel' ),
+			__( 'Proveedor LLM (feedback por módulo)', 'formulario-acelera-ai-daniel' ),
 			'__return_false',
 			'acelera-settings-llm'
 		);
 
-		$this->add_field( 'llm_provider', __( 'Proveedor', 'formulario-acelara-ai-daniel' ), 'llm', 'select', array(
+		$this->add_field( 'llm_provider', __( 'Proveedor', 'formulario-acelera-ai-daniel' ), 'llm', 'select', array(
 			'options' => array(
 				'claude'  => 'Claude (Anthropic)',
 				'chatgpt' => 'ChatGPT (OpenAI)',
 			),
 		) );
-		$this->add_field( 'anthropic_api_key', __( 'API Key de Anthropic', 'formulario-acelara-ai-daniel' ), 'llm', 'api_key' );
-		$this->add_field( 'openai_api_key', __( 'API Key de OpenAI', 'formulario-acelara-ai-daniel' ), 'llm', 'api_key' );
-		$this->add_field( 'llm_model', __( 'Modelo', 'formulario-acelara-ai-daniel' ), 'llm', 'text', array(
-			'description' => __( 'Identificador del modelo aplicado al proveedor activo. Déjalo vacío para usar el default del proveedor: claude-sonnet-4-6 (Claude) o gpt-5 (OpenAI). Otros válidos: claude-haiku-4-5, claude-opus-4-6, gpt-4.1-mini, gpt-4o-mini.', 'formulario-acelara-ai-daniel' ),
+		$this->add_field( 'anthropic_api_key', __( 'API Key de Anthropic', 'formulario-acelera-ai-daniel' ), 'llm', 'api_key' );
+		$this->add_field( 'openai_api_key', __( 'API Key de OpenAI', 'formulario-acelera-ai-daniel' ), 'llm', 'api_key' );
+		$this->add_field( 'llm_model', __( 'Modelo', 'formulario-acelera-ai-daniel' ), 'llm', 'text', array(
+			'description' => __( 'Identificador del modelo aplicado al proveedor activo. Déjalo vacío para usar el default del proveedor: claude-sonnet-4-6 (Claude) o gpt-5 (OpenAI). Otros válidos: claude-haiku-4-5, claude-opus-4-6, gpt-4.1-mini, gpt-4o-mini.', 'formulario-acelera-ai-daniel' ),
 		) );
 
 		// --- Tab: Prompts ---------------------------------------------------.
 		add_settings_section(
 			'acelera_section_prompts',
-			__( 'Prompts por módulo', 'formulario-acelara-ai-daniel' ),
+			__( 'Prompts por módulo', 'formulario-acelera-ai-daniel' ),
 			array( $this, 'render_prompts_section_intro' ),
 			'acelera-settings-prompts'
 		);
@@ -287,13 +287,13 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 		// --- Tab: Email -----------------------------------------------------.
 		add_settings_section(
 			'acelera_section_email',
-			__( 'Email de resultado', 'formulario-acelara-ai-daniel' ),
+			__( 'Email de resultado', 'formulario-acelera-ai-daniel' ),
 			'__return_false',
 			'acelera-settings-email'
 		);
 
-		$this->add_field( 'email_subject', __( 'Asunto', 'formulario-acelara-ai-daniel' ), 'email', 'text' );
-		$this->add_field( 'email_from_name', __( 'Nombre del remitente', 'formulario-acelara-ai-daniel' ), 'email', 'text' );
+		$this->add_field( 'email_subject', __( 'Asunto', 'formulario-acelera-ai-daniel' ), 'email', 'text' );
+		$this->add_field( 'email_from_name', __( 'Nombre del remitente', 'formulario-acelera-ai-daniel' ), 'email', 'text' );
 
 	}
 
@@ -387,10 +387,10 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 		}
 
 		$tabs = array(
-			'clientify' => __( 'Clientify', 'formulario-acelara-ai-daniel' ),
-			'llm'       => __( 'LLM', 'formulario-acelara-ai-daniel' ),
-			'prompts'   => __( 'Prompts', 'formulario-acelara-ai-daniel' ),
-			'email'     => __( 'Email', 'formulario-acelara-ai-daniel' ),
+			'clientify' => __( 'Clientify', 'formulario-acelera-ai-daniel' ),
+			'llm'       => __( 'LLM', 'formulario-acelera-ai-daniel' ),
+			'prompts'   => __( 'Prompts', 'formulario-acelera-ai-daniel' ),
+			'email'     => __( 'Email', 'formulario-acelera-ai-daniel' ),
 		);
 
 		$active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'clientify'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -399,7 +399,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 			$active_tab = 'clientify';
 		}
 
-		include plugin_dir_path( __FILE__ ) . 'partials/formulario-acelara-ai-daniel-admin-display.php';
+		include plugin_dir_path( __FILE__ ) . 'partials/formulario-acelera-ai-daniel-admin-display.php';
 
 	}
 
@@ -427,7 +427,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 					esc_attr( $name ),
 					esc_attr( $this->mask_api_key( $value ) )
 				);
-				echo '<p class="description">' . esc_html__( 'Se muestran solo los últimos 4 caracteres. Pegá una clave nueva para reemplazarla.', 'formulario-acelara-ai-daniel' ) . '</p>';
+				echo '<p class="description">' . esc_html__( 'Se muestran solo los últimos 4 caracteres. Pegá una clave nueva para reemplazarla.', 'formulario-acelera-ai-daniel' ) . '</p>';
 				break;
 
 			case 'select':
@@ -509,7 +509,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 		$total       = $repo->count_all();
 		$total_pages = max( 1, (int) ceil( $total / $per_page ) );
 
-		include plugin_dir_path( __FILE__ ) . 'partials/formulario-acelara-ai-daniel-admin-submissions.php';
+		include plugin_dir_path( __FILE__ ) . 'partials/formulario-acelera-ai-daniel-admin-submissions.php';
 
 	}
 
@@ -524,7 +524,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'No tienes permisos suficientes.', 'formulario-acelara-ai-daniel' ) ),
+				array( 'message' => __( 'No tienes permisos suficientes.', 'formulario-acelera-ai-daniel' ) ),
 				403
 			);
 		}
@@ -537,7 +537,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 		}
 
 		wp_send_json_success(
-			array( 'message' => __( 'Conexión correcta con Clientify.', 'formulario-acelara-ai-daniel' ) )
+			array( 'message' => __( 'Conexión correcta con Clientify.', 'formulario-acelera-ai-daniel' ) )
 		);
 
 	}
@@ -555,7 +555,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'No tienes permisos suficientes.', 'formulario-acelara-ai-daniel' ) ),
+				array( 'message' => __( 'No tienes permisos suficientes.', 'formulario-acelera-ai-daniel' ) ),
 				403
 			);
 		}
@@ -567,13 +567,13 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 
 		if ( ! $row ) {
 			wp_send_json_error(
-				array( 'message' => __( 'La sumisión no existe.', 'formulario-acelara-ai-daniel' ) )
+				array( 'message' => __( 'La sumisión no existe.', 'formulario-acelera-ai-daniel' ) )
 			);
 		}
 
 		if ( 'sent' === (string) $row->clientify_status ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Esta sumisión ya fue enviada a Clientify.', 'formulario-acelara-ai-daniel' ) )
+				array( 'message' => __( 'Esta sumisión ya fue enviada a Clientify.', 'formulario-acelera-ai-daniel' ) )
 			);
 		}
 
@@ -584,7 +584,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 		Acelera_Clientify_Dispatcher::schedule( $submission_id, 1, 0 );
 
 		wp_send_json_success(
-			array( 'message' => __( 'Reenvío programado.', 'formulario-acelara-ai-daniel' ) )
+			array( 'message' => __( 'Reenvío programado.', 'formulario-acelera-ai-daniel' ) )
 		);
 
 	}
@@ -596,8 +596,8 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 	 */
 	public function render_prompts_section_intro() {
 
-		echo '<p class="description">' . esc_html__( 'Cada textarea es el prompt de sistema usado para generar el feedback del módulo. Si un prompt queda vacío, NO se genera feedback para ese módulo (el shortcode se oculta).', 'formulario-acelara-ai-daniel' ) . '</p>';
-		echo '<p class="description">' . esc_html__( 'Placeholders disponibles (reemplazo simple): {nombre} = nombre del alumno; {modulo} = nombre temático del módulo del shortcode; {ruta_principal} = primer módulo del orden personalizado del alumno; {respuestas_resumen} = resumen compacto del diagnóstico (objetivo, situación, orden con puntajes). Los dos últimos quedan vacíos si el alumno aún no completó el formulario.', 'formulario-acelara-ai-daniel' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Cada textarea es el prompt de sistema usado para generar el feedback del módulo. Si un prompt queda vacío, NO se genera feedback para ese módulo (el shortcode se oculta).', 'formulario-acelera-ai-daniel' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Placeholders disponibles (reemplazo simple): {nombre} = nombre del alumno; {modulo} = nombre temático del módulo del shortcode; {ruta_principal} = primer módulo del orden personalizado del alumno; {respuestas_resumen} = resumen compacto del diagnóstico (objetivo, situación, orden con puntajes). Los dos últimos quedan vacíos si el alumno aún no completó el formulario.', 'formulario-acelera-ai-daniel' ) . '</p>';
 
 	}
 
@@ -616,7 +616,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error(
-				array( 'message' => __( 'No tienes permisos suficientes.', 'formulario-acelara-ai-daniel' ) ),
+				array( 'message' => __( 'No tienes permisos suficientes.', 'formulario-acelera-ai-daniel' ) ),
 				403
 			);
 		}
@@ -626,7 +626,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 
 		if ( '' === $user_ref ) {
 			wp_send_json_error(
-				array( 'message' => __( 'Indica el ID o email del usuario.', 'formulario-acelara-ai-daniel' ) )
+				array( 'message' => __( 'Indica el ID o email del usuario.', 'formulario-acelera-ai-daniel' ) )
 			);
 		}
 
@@ -636,7 +636,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 
 		if ( ! $user ) {
 			wp_send_json_error(
-				array( 'message' => __( 'No se encontró ningún usuario con ese ID o email.', 'formulario-acelara-ai-daniel' ) )
+				array( 'message' => __( 'No se encontró ningún usuario con ese ID o email.', 'formulario-acelera-ai-daniel' ) )
 			);
 		}
 
@@ -648,7 +648,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 			$modules = array( $module );
 		} else {
 			wp_send_json_error(
-				array( 'message' => __( 'Módulo inválido.', 'formulario-acelara-ai-daniel' ) )
+				array( 'message' => __( 'Módulo inválido.', 'formulario-acelera-ai-daniel' ) )
 			);
 
 			return;
@@ -660,7 +660,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 			array(
 				'message' => sprintf(
 					/* translators: 1: number of cache entries deleted, 2: user login. */
-					__( 'Feedback eliminado: %1$d entrada(s) de caché de %2$s. Se regenerará en su próxima visita.', 'formulario-acelara-ai-daniel' ),
+					__( 'Feedback eliminado: %1$d entrada(s) de caché de %2$s. Se regenerará en su próxima visita.', 'formulario-acelera-ai-daniel' ),
 					(int) $deleted,
 					$user->user_login
 				),

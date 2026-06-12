@@ -6,8 +6,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/llm
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/llm
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -33,8 +33,8 @@ if ( ! defined( 'WPINC' ) ) {
  * before caching or printing.
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/llm
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/llm
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
 class Acelera_LLM_Client {

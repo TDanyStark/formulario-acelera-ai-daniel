@@ -6,8 +6,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/crm
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/crm
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -40,8 +40,8 @@ if ( ! defined( 'WPINC' ) ) {
  * NEVER written to logs or error payloads.
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/crm
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/crm
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
 class Acelera_Clientify {
@@ -202,7 +202,7 @@ class Acelera_Clientify {
 		if ( ! $this->has_api_key() ) {
 			return new WP_Error(
 				'acelera_clientify_no_key',
-				__( 'No hay API key de Clientify configurada.', 'formulario-acelara-ai-daniel' )
+				__( 'No hay API key de Clientify configurada.', 'formulario-acelera-ai-daniel' )
 			);
 		}
 
@@ -317,7 +317,7 @@ class Acelera_Clientify {
 		$labels = Acelera_Renaming::build_labels( Acelera_Renaming::sanitize_order( $order ) );
 
 		if ( array() !== $labels ) {
-			$lines[] = '<b>' . esc_html__( 'Orden de módulos resultante', 'formulario-acelara-ai-daniel' ) . ':</b> '
+			$lines[] = '<b>' . esc_html__( 'Orden de módulos resultante', 'formulario-acelera-ai-daniel' ) . ':</b> '
 				. esc_html( implode( ' → ', array_values( $labels ) ) );
 		}
 
@@ -331,7 +331,7 @@ class Acelera_Clientify {
 				$pairs[] = ucfirst( (string) $route ) . ': ' . (int) $score;
 			}
 
-			$lines[] = '<b>' . esc_html__( 'Scores por ruta', 'formulario-acelara-ai-daniel' ) . ':</b> '
+			$lines[] = '<b>' . esc_html__( 'Scores por ruta', 'formulario-acelera-ai-daniel' ) . ':</b> '
 				. esc_html( implode( ' | ', $pairs ) );
 		}
 
@@ -339,13 +339,13 @@ class Acelera_Clientify {
 		$flags = ( isset( $scoring['flags'] ) && is_array( $scoring['flags'] ) ) ? $scoring['flags'] : array();
 
 		if ( ! empty( $flags['bloqueador_migratorio'] ) ) {
-			$lines[] = '<b>' . esc_html__( 'Bloqueador migratorio', 'formulario-acelara-ai-daniel' ) . ':</b> '
-				. esc_html__( 'Sí', 'formulario-acelara-ai-daniel' );
+			$lines[] = '<b>' . esc_html__( 'Bloqueador migratorio', 'formulario-acelera-ai-daniel' ) . ':</b> '
+				. esc_html__( 'Sí', 'formulario-acelera-ai-daniel' );
 		}
 
 		if ( ! empty( $flags['revision_asesor'] ) ) {
-			$lines[] = '<b>' . esc_html__( 'Requiere revisión de asesor', 'formulario-acelara-ai-daniel' ) . ':</b> '
-				. esc_html__( 'Sí', 'formulario-acelara-ai-daniel' );
+			$lines[] = '<b>' . esc_html__( 'Requiere revisión de asesor', 'formulario-acelera-ai-daniel' ) . ':</b> '
+				. esc_html__( 'Sí', 'formulario-acelera-ai-daniel' );
 		}
 
 		// --- CV link. ---------------------------------------------------------.
@@ -357,7 +357,7 @@ class Acelera_Clientify {
 		}
 
 		if ( '' !== $cv_url ) {
-			$lines[] = '<b>' . esc_html__( 'CV adjunto', 'formulario-acelara-ai-daniel' ) . ':</b> '
+			$lines[] = '<b>' . esc_html__( 'CV adjunto', 'formulario-acelera-ai-daniel' ) . ':</b> '
 				. '<a href="' . esc_url( $cv_url ) . '">' . esc_html( $cv_url ) . '</a>';
 		}
 
@@ -476,7 +476,7 @@ class Acelera_Clientify {
 		if ( ! $this->has_api_key() ) {
 			return new WP_Error(
 				'acelera_clientify_no_key',
-				__( 'No hay API key de Clientify configurada.', 'formulario-acelara-ai-daniel' )
+				__( 'No hay API key de Clientify configurada.', 'formulario-acelera-ai-daniel' )
 			);
 		}
 
@@ -516,7 +516,7 @@ class Acelera_Clientify {
 				'acelera_clientify_http_error',
 				sprintf(
 					/* translators: %s: transport error message. */
-					__( 'Error de conexión con Clientify: %s', 'formulario-acelara-ai-daniel' ),
+					__( 'Error de conexión con Clientify: %s', 'formulario-acelera-ai-daniel' ),
 					$response->get_error_message()
 				)
 			);
@@ -531,7 +531,7 @@ class Acelera_Clientify {
 				'acelera_clientify_api_' . $code,
 				sprintf(
 					/* translators: 1: HTTP status code, 2: response body excerpt. */
-					__( 'Clientify respondió %1$d: %2$s', 'formulario-acelara-ai-daniel' ),
+					__( 'Clientify respondió %1$d: %2$s', 'formulario-acelera-ai-daniel' ),
 					$code,
 					substr( $raw_body, 0, 300 )
 				),

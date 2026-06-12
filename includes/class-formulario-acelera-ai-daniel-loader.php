@@ -6,8 +6,8 @@
  * @link       https://https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -21,11 +21,11 @@ if ( ! defined( 'WPINC' ) ) {
  * the plugin, and register them with the WordPress API. Call the
  * run function to execute the list of actions and filters.
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
-class Formulario_Acelara_Ai_Daniel_Loader {
+class Formulario_Acelera_Ai_Daniel_Loader {
 
 	/**
 	 * The array of actions registered with WordPress.

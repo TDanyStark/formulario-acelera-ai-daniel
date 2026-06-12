@@ -1,4 +1,4 @@
-=== Formulario Acelara AI Daniel ===
+=== Formulario Acelera AI Daniel ===
 Contributors: danielamado
 Donate link: https://danielamado.com/
 Tags: learndash, acelera, formulario, clientify, llm
@@ -13,7 +13,7 @@ Plugin a medida para el curso ACELERA en LearnDash: gate de Bienvenida, sidebar 
 
 == Description ==
 
-**Formulario Acelara AI Daniel** es un plugin a medida para el curso **ACELERA** de LearnDash, curso ID `16242`.
+**Formulario Acelera AI Daniel** es un plugin a medida para el curso **ACELERA** de LearnDash, curso ID `16242`.
 
 El plugin adapta la experiencia del curso para que cada alumno complete primero la sección de Bienvenida, responda un diagnóstico y reciba un orden personalizado de módulos según sus respuestas.
 
@@ -28,7 +28,7 @@ Funcionalidades principales:
 
 == Installation ==
 
-1. Sube la carpeta `formulario-acelara-ai-daniel` a `/wp-content/plugins/`.
+1. Sube la carpeta `formulario-acelera-ai-daniel` a `/wp-content/plugins/`.
 2. Activa el plugin desde **Plugins** en WordPress.
 3. Verifica que LearnDash esté activo y que el curso ACELERA use el ID `16242`.
 4. Configura el plugin desde **Curso Acelera** en el administrador de WordPress.

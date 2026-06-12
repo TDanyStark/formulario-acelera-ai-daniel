@@ -9,8 +9,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/form
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -33,8 +33,8 @@ if ( ! defined( 'WPINC' ) ) {
  * - Ties broken by natural course order m1 < m2 < m3 < m4 < m5.
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/form
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
 class Acelera_Scoring {

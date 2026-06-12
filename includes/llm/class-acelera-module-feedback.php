@@ -6,8 +6,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/llm
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/llm
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -42,8 +42,8 @@ if ( ! defined( 'WPINC' ) ) {
  *   (wp_ajax_acelera_llm_regenerate).
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/llm
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/llm
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
 class Acelera_Module_Feedback {
@@ -178,7 +178,7 @@ class Acelera_Module_Feedback {
 				'<div class="acelera-feedback-content" hidden></div>' .
 			'</div>',
 			esc_attr( $module ),
-			esc_html__( 'Generando tu feedback personalizado…', 'formulario-acelara-ai-daniel' )
+			esc_html__( 'Generando tu feedback personalizado…', 'formulario-acelera-ai-daniel' )
 		);
 
 	}
@@ -232,7 +232,7 @@ class Acelera_Module_Feedback {
 				'nonce'        => wp_create_nonce( 'wp_rest' ),
 				'retryDelayMs' => 5000,
 				'strings'      => array(
-					'loading' => __( 'Generando tu feedback personalizado…', 'formulario-acelara-ai-daniel' ),
+					'loading' => __( 'Generando tu feedback personalizado…', 'formulario-acelera-ai-daniel' ),
 				),
 			)
 		);

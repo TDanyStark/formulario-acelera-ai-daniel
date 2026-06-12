@@ -18,7 +18,7 @@
  *
  * @since 1.0.0
  *
- * @package Formulario_Acelara_Ai_Daniel\Templates\LD30
+ * @package Formulario_Acelera_Ai_Daniel\Templates\LD30
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

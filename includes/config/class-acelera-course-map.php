@@ -9,8 +9,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/config
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/config
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -25,8 +25,8 @@ if ( ! defined( 'WPINC' ) ) {
  * module declares an explicit list of lesson IDs instead of ranges.
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/config
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/config
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
 class Acelera_Course_Map {

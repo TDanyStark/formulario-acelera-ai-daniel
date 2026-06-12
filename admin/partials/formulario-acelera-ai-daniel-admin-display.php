@@ -5,13 +5,13 @@
  *
  * Renders the "Curso Acelera" settings page with its tab navigation.
  * Expects $tabs (array slug => label) and $active_tab (string) from
- * Formulario_Acelara_Ai_Daniel_Admin::render_settings_page().
+ * Formulario_Acelera_Ai_Daniel_Admin::render_settings_page().
  *
  * @link       https://https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/admin/partials
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/admin/partials
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -45,7 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<hr>
 		<p>
 			<button type="button" class="button" id="acelera-clientify-test">
-				<?php esc_html_e( 'Probar conexión', 'formulario-acelara-ai-daniel' ); ?>
+				<?php esc_html_e( 'Probar conexión', 'formulario-acelera-ai-daniel' ); ?>
 			</button>
 			<span id="acelera-clientify-test-result" aria-live="polite"></span>
 		</p>
@@ -53,17 +53,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php if ( 'llm' === $active_tab ) : ?>
 		<hr>
-		<h2><?php esc_html_e( 'Regenerar feedback (soporte)', 'formulario-acelara-ai-daniel' ); ?></h2>
+		<h2><?php esc_html_e( 'Regenerar feedback (soporte)', 'formulario-acelera-ai-daniel' ); ?></h2>
 		<p class="description">
-			<?php esc_html_e( 'Borra el feedback cacheado de un alumno; se volverá a generar con el LLM en su próxima visita a una clase con el shortcode.', 'formulario-acelara-ai-daniel' ); ?>
+			<?php esc_html_e( 'Borra el feedback cacheado de un alumno; se volverá a generar con el LLM en su próxima visita a una clase con el shortcode.', 'formulario-acelera-ai-daniel' ); ?>
 		</p>
 		<p>
-			<label for="acelera-llm-user"><?php esc_html_e( 'Usuario (ID o email)', 'formulario-acelara-ai-daniel' ); ?></label>
+			<label for="acelera-llm-user"><?php esc_html_e( 'Usuario (ID o email)', 'formulario-acelera-ai-daniel' ); ?></label>
 			<input type="text" id="acelera-llm-user" class="regular-text" />
 
-			<label for="acelera-llm-module"><?php esc_html_e( 'Módulo', 'formulario-acelara-ai-daniel' ); ?></label>
+			<label for="acelera-llm-module"><?php esc_html_e( 'Módulo', 'formulario-acelera-ai-daniel' ); ?></label>
 			<select id="acelera-llm-module">
-				<option value="todos"><?php esc_html_e( 'Todos los módulos', 'formulario-acelara-ai-daniel' ); ?></option>
+				<option value="todos"><?php esc_html_e( 'Todos los módulos', 'formulario-acelera-ai-daniel' ); ?></option>
 				<?php foreach ( Acelera_Course_Map::modules() as $module_key => $module_def ) : ?>
 					<option value="<?php echo esc_attr( $module_key ); ?>">
 						<?php echo esc_html( sprintf( '%s — %s', strtoupper( $module_key ), $module_def['label'] ) ); ?>
@@ -72,7 +72,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</select>
 
 			<button type="button" class="button" id="acelera-llm-regenerate">
-				<?php esc_html_e( 'Regenerar feedback', 'formulario-acelara-ai-daniel' ); ?>
+				<?php esc_html_e( 'Regenerar feedback', 'formulario-acelera-ai-daniel' ); ?>
 			</button>
 			<span id="acelera-llm-regenerate-result" aria-live="polite"></span>
 		</p>

@@ -6,8 +6,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/crm
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/crm
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -43,8 +43,8 @@ if ( ! defined( 'WPINC' ) ) {
  * `clientify_status` values written here: pending | sent | error | skipped.
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/crm
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/crm
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
 class Acelera_Clientify_Dispatcher {
@@ -249,7 +249,7 @@ class Acelera_Clientify_Dispatcher {
 
 			return new WP_Error(
 				'acelera_clientify_no_id',
-				__( 'Clientify no devolvió un ID de contacto.', 'formulario-acelara-ai-daniel' )
+				__( 'Clientify no devolvió un ID de contacto.', 'formulario-acelera-ai-daniel' )
 			);
 		}
 

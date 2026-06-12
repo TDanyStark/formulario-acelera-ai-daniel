@@ -30,7 +30,7 @@ Las fases 2, 3, 4 y 6 son independientes entre sí y pueden implementarse en par
 Se extiende el esqueleto existente (WordPress Plugin Boilerplate):
 
 ```
-formulario-acelara-ai-daniel.php      # Bootstrap (existente)
+formulario-acelera-ai-daniel.php      # Bootstrap (existente)
 includes/
   class-...-daniel.php                # Core: registra todos los hooks (existente, se amplía)
   class-...-loader.php                # Loader WPPB (existente)
@@ -56,7 +56,7 @@ public/
   css/ · js/
 ```
 
-**Convenciones**: prefijo `acelera_` para opciones/hooks propios; tabla `{$wpdb->prefix}acelera_form_submissions`; text domain existente `formulario-acelara-ai-daniel`; PHP 7.4+ compatible.
+**Convenciones**: prefijo `acelera_` para opciones/hooks propios; tabla `{$wpdb->prefix}acelera_form_submissions`; text domain existente `formulario-acelera-ai-daniel`; PHP 7.4+ compatible.
 
 ## Mapa del curso (IDs hardcodeados — fuente: `orden_curso.md`)
 

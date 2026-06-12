@@ -15,7 +15,7 @@
  * Expects the `aceleraForm` object localized by Acelera_Form_Shortcode:
  * { restUrl, nonce, userId, state, result, questions, prefill, strings }.
  *
- * @package Formulario_Acelara_Ai_Daniel
+ * @package Formulario_Acelera_Ai_Daniel
  * @since   1.0.0
  */
 

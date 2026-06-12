@@ -5,8 +5,8 @@
 
 ## 1.1 Limpieza del boilerplate
 
-- [ ] Eliminar/vaciar los métodos demo de enqueue en `admin/class-formulario-acelara-ai-daniel-admin.php` y `public/class-formulario-acelara-ai-daniel-public.php` (los comentarios "for demonstration purposes only").
-- [ ] Mantener el patrón loader: todos los hooks nuevos se registran en `includes/class-formulario-acelara-ai-daniel.php` → `define_admin_hooks()` / `define_public_hooks()`.
+- [ ] Eliminar/vaciar los métodos demo de enqueue en `admin/class-formulario-acelera-ai-daniel-admin.php` y `public/class-formulario-acelera-ai-daniel-public.php` (los comentarios "for demonstration purposes only").
+- [ ] Mantener el patrón loader: todos los hooks nuevos se registran en `includes/class-formulario-acelera-ai-daniel.php` → `define_admin_hooks()` / `define_public_hooks()`.
 - [ ] Encolar CSS/JS **solo** cuando se está dentro del curso 16242 o sus lecciones (chequear `learndash_get_course_id()` en el enqueue público).
 - [ ] Agregar guard: si LearnDash no está activo (`!defined('LEARNDASH_VERSION')`), mostrar admin notice y no registrar hooks públicos.
 
@@ -41,7 +41,7 @@ Acelera_Course_Map::all_module_lessons()              // flat array de IDs M1–
 
 ## 1.3 Base de datos (Activator)
 
-En `includes/class-formulario-acelara-ai-daniel-activator.php`:
+En `includes/class-formulario-acelera-ai-daniel-activator.php`:
 
 - [ ] Crear tabla con `dbDelta()`:
 
@@ -71,7 +71,7 @@ CREATE TABLE {$wpdb->prefix}acelera_form_submissions (
 
 ## 1.4 Página de ajustes (Settings API)
 
-En `admin/class-formulario-acelara-ai-daniel-admin.php`:
+En `admin/class-formulario-acelera-ai-daniel-admin.php`:
 
 - [ ] Menú propio: `add_menu_page( 'Acelera', 'Curso Acelera', 'manage_options', 'acelera-settings', ... )` (o submenú bajo Ajustes — decidir al implementar).
 - [ ] Registrar grupo de opciones `acelera_settings` (una opción array serializada) con pestañas:

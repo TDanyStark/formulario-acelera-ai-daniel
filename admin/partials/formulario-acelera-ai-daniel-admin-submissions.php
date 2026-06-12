@@ -6,13 +6,13 @@
  * Minimal escaped table with the Clientify sync status per submission and
  * a "Reenviar" action for failed/skipped rows. Expects $submissions
  * (row objects), $page, $per_page, $total and $total_pages from
- * Formulario_Acelara_Ai_Daniel_Admin::render_submissions_page().
+ * Formulario_Acelera_Ai_Daniel_Admin::render_submissions_page().
  *
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/admin/partials
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/admin/partials
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,10 +20,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $acelera_status_labels = array(
-	'pending' => __( 'Pendiente', 'formulario-acelara-ai-daniel' ),
-	'sent'    => __( 'Enviado', 'formulario-acelara-ai-daniel' ),
-	'error'   => __( 'Error', 'formulario-acelara-ai-daniel' ),
-	'skipped' => __( 'Omitido', 'formulario-acelara-ai-daniel' ),
+	'pending' => __( 'Pendiente', 'formulario-acelera-ai-daniel' ),
+	'sent'    => __( 'Enviado', 'formulario-acelera-ai-daniel' ),
+	'error'   => __( 'Error', 'formulario-acelera-ai-daniel' ),
+	'skipped' => __( 'Omitido', 'formulario-acelera-ai-daniel' ),
 );
 ?>
 
@@ -34,7 +34,7 @@ $acelera_status_labels = array(
 		<?php
 		printf(
 			/* translators: %d: total number of submissions. */
-			esc_html__( '%d sumisiones en total. Estado de sincronización con Clientify por fila.', 'formulario-acelara-ai-daniel' ),
+			esc_html__( '%d sumisiones en total. Estado de sincronización con Clientify por fila.', 'formulario-acelera-ai-daniel' ),
 			(int) $total
 		);
 		?>
@@ -43,20 +43,20 @@ $acelera_status_labels = array(
 	<table class="widefat striped">
 		<thead>
 			<tr>
-				<th scope="col"><?php esc_html_e( 'ID', 'formulario-acelara-ai-daniel' ); ?></th>
-				<th scope="col"><?php esc_html_e( 'Usuario', 'formulario-acelara-ai-daniel' ); ?></th>
-				<th scope="col"><?php esc_html_e( 'Fecha', 'formulario-acelara-ai-daniel' ); ?></th>
-				<th scope="col"><?php esc_html_e( 'Estado del formulario', 'formulario-acelara-ai-daniel' ); ?></th>
-				<th scope="col"><?php esc_html_e( 'Clientify', 'formulario-acelara-ai-daniel' ); ?></th>
-				<th scope="col"><?php esc_html_e( 'Contacto', 'formulario-acelara-ai-daniel' ); ?></th>
-				<th scope="col"><?php esc_html_e( 'Último error', 'formulario-acelara-ai-daniel' ); ?></th>
-				<th scope="col"><?php esc_html_e( 'Acciones', 'formulario-acelara-ai-daniel' ); ?></th>
+				<th scope="col"><?php esc_html_e( 'ID', 'formulario-acelera-ai-daniel' ); ?></th>
+				<th scope="col"><?php esc_html_e( 'Usuario', 'formulario-acelera-ai-daniel' ); ?></th>
+				<th scope="col"><?php esc_html_e( 'Fecha', 'formulario-acelera-ai-daniel' ); ?></th>
+				<th scope="col"><?php esc_html_e( 'Estado del formulario', 'formulario-acelera-ai-daniel' ); ?></th>
+				<th scope="col"><?php esc_html_e( 'Clientify', 'formulario-acelera-ai-daniel' ); ?></th>
+				<th scope="col"><?php esc_html_e( 'Contacto', 'formulario-acelera-ai-daniel' ); ?></th>
+				<th scope="col"><?php esc_html_e( 'Último error', 'formulario-acelera-ai-daniel' ); ?></th>
+				<th scope="col"><?php esc_html_e( 'Acciones', 'formulario-acelera-ai-daniel' ); ?></th>
 			</tr>
 		</thead>
 		<tbody>
 			<?php if ( array() === $submissions ) : ?>
 				<tr>
-					<td colspan="8"><?php esc_html_e( 'No hay sumisiones todavía.', 'formulario-acelara-ai-daniel' ); ?></td>
+					<td colspan="8"><?php esc_html_e( 'No hay sumisiones todavía.', 'formulario-acelera-ai-daniel' ); ?></td>
 				</tr>
 			<?php else : ?>
 				<?php foreach ( $submissions as $submission ) : ?>
@@ -97,7 +97,7 @@ $acelera_status_labels = array(
 						<td>
 							<?php if ( $acelera_resendable ) : ?>
 								<button type="button" class="button button-small acelera-clientify-resend" data-submission-id="<?php echo (int) $submission->id; ?>">
-									<?php esc_html_e( 'Reenviar', 'formulario-acelara-ai-daniel' ); ?>
+									<?php esc_html_e( 'Reenviar', 'formulario-acelera-ai-daniel' ); ?>
 								</button>
 								<span class="acelera-resend-result" aria-live="polite"></span>
 							<?php else : ?>

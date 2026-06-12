@@ -6,8 +6,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -21,8 +21,8 @@ if ( ! defined( 'WPINC' ) ) {
  * worry about missing keys.
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
 class Acelera_Settings {

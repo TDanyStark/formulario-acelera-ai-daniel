@@ -6,8 +6,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/form
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -49,8 +49,8 @@ if ( ! defined( 'WPINC' ) ) {
  * by position), so it stays order-independent.
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/form
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
 class Acelera_Renaming {

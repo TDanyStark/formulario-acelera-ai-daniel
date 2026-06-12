@@ -6,8 +6,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/form
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -33,8 +33,8 @@ if ( ! defined( 'WPINC' ) ) {
  * earlier shortcode precedent existed).
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/form
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
 class Acelera_Form_Shortcode {
@@ -104,7 +104,7 @@ class Acelera_Form_Shortcode {
 		if ( ! is_user_logged_in() ) {
 			return sprintf(
 				'<div class="acelera-form acelera-form--notice"><p>%s</p></div>',
-				esc_html__( 'Debes iniciar sesión para completar el formulario de diagnóstico.', 'formulario-acelara-ai-daniel' )
+				esc_html__( 'Debes iniciar sesión para completar el formulario de diagnóstico.', 'formulario-acelera-ai-daniel' )
 			);
 		}
 
@@ -191,34 +191,34 @@ class Acelera_Form_Shortcode {
 					'p0_2' => (string) $user->user_email,
 				),
 				'strings'   => array(
-					'back'           => __( 'Atrás', 'formulario-acelara-ai-daniel' ),
-					'skip'           => __( 'Omitir', 'formulario-acelara-ai-daniel' ),
-					'next'           => __( 'Siguiente', 'formulario-acelara-ai-daniel' ),
-					'send'           => __( 'Enviar diagnóstico', 'formulario-acelara-ai-daniel' ),
-					'sending'        => __( 'Enviando…', 'formulario-acelara-ai-daniel' ),
-					'required'       => __( 'Esta pregunta es obligatoria.', 'formulario-acelara-ai-daniel' ),
-					'invalidEmail'   => __( 'El correo electrónico no es válido.', 'formulario-acelara-ai-daniel' ),
-					'invalidTel'     => __( 'El teléfono no es válido (mínimo 7 dígitos).', 'formulario-acelara-ai-daniel' ),
-					'invalidDate'    => __( 'La fecha no es válida.', 'formulario-acelara-ai-daniel' ),
+					'back'           => __( 'Atrás', 'formulario-acelera-ai-daniel' ),
+					'skip'           => __( 'Omitir', 'formulario-acelera-ai-daniel' ),
+					'next'           => __( 'Siguiente', 'formulario-acelera-ai-daniel' ),
+					'send'           => __( 'Enviar diagnóstico', 'formulario-acelera-ai-daniel' ),
+					'sending'        => __( 'Enviando…', 'formulario-acelera-ai-daniel' ),
+					'required'       => __( 'Esta pregunta es obligatoria.', 'formulario-acelera-ai-daniel' ),
+					'invalidEmail'   => __( 'El correo electrónico no es válido.', 'formulario-acelera-ai-daniel' ),
+					'invalidTel'     => __( 'El teléfono no es válido (mínimo 7 dígitos).', 'formulario-acelera-ai-daniel' ),
+					'invalidDate'    => __( 'La fecha no es válida.', 'formulario-acelera-ai-daniel' ),
 					/* translators: %d: maximum number of selectable options. */
-					'maxOptions'     => __( 'Puedes seleccionar máximo %d opciones.', 'formulario-acelara-ai-daniel' ),
-					'invalidRows'    => __( 'Completa todos los datos de cada hijo (nombre, edad 0–99 y si estudia).', 'formulario-acelara-ai-daniel' ),
-					'addChild'       => __( '+ Agregar hijo', 'formulario-acelara-ai-daniel' ),
-					'removeChild'    => __( 'Quitar', 'formulario-acelara-ai-daniel' ),
-					'childLabel'     => __( 'Hijo/a', 'formulario-acelara-ai-daniel' ),
-					'uploading'      => __( 'Subiendo archivo…', 'formulario-acelara-ai-daniel' ),
-					'uploaded'       => __( 'Archivo subido:', 'formulario-acelara-ai-daniel' ),
-					'uploadError'    => __( 'No se pudo subir el archivo.', 'formulario-acelara-ai-daniel' ),
-					'fileTooBig'     => __( 'El archivo supera el tamaño máximo de 10 MB.', 'formulario-acelara-ai-daniel' ),
-					'fileBadType'    => __( 'Solo se permiten archivos PDF o Word (.pdf, .doc, .docx).', 'formulario-acelara-ai-daniel' ),
-					'removeFile'     => __( 'Quitar archivo', 'formulario-acelara-ai-daniel' ),
+					'maxOptions'     => __( 'Puedes seleccionar máximo %d opciones.', 'formulario-acelera-ai-daniel' ),
+					'invalidRows'    => __( 'Completa todos los datos de cada hijo (nombre, edad 0–99 y si estudia).', 'formulario-acelera-ai-daniel' ),
+					'addChild'       => __( '+ Agregar hijo', 'formulario-acelera-ai-daniel' ),
+					'removeChild'    => __( 'Quitar', 'formulario-acelera-ai-daniel' ),
+					'childLabel'     => __( 'Hijo/a', 'formulario-acelera-ai-daniel' ),
+					'uploading'      => __( 'Subiendo archivo…', 'formulario-acelera-ai-daniel' ),
+					'uploaded'       => __( 'Archivo subido:', 'formulario-acelera-ai-daniel' ),
+					'uploadError'    => __( 'No se pudo subir el archivo.', 'formulario-acelera-ai-daniel' ),
+					'fileTooBig'     => __( 'El archivo supera el tamaño máximo de 10 MB.', 'formulario-acelera-ai-daniel' ),
+					'fileBadType'    => __( 'Solo se permiten archivos PDF o Word (.pdf, .doc, .docx).', 'formulario-acelera-ai-daniel' ),
+					'removeFile'     => __( 'Quitar archivo', 'formulario-acelera-ai-daniel' ),
 					/* translators: 1: current question number, 2: total visible questions. */
-					'progressOf'     => __( 'Pregunta %1$d de %2$d', 'formulario-acelara-ai-daniel' ),
-					'errorGeneric'   => __( 'Ocurrió un error. Intenta de nuevo.', 'formulario-acelara-ai-daniel' ),
-					'successTitle'   => __( '¡Diagnóstico enviado! Cargando tu resultado…', 'formulario-acelara-ai-daniel' ),
-					'resetting'      => __( 'Reseteando…', 'formulario-acelara-ai-daniel' ),
-					'scaleLow'       => __( 'Nada listo/a', 'formulario-acelara-ai-daniel' ),
-					'scaleHigh'      => __( 'Totalmente listo/a', 'formulario-acelara-ai-daniel' ),
+					'progressOf'     => __( 'Pregunta %1$d de %2$d', 'formulario-acelera-ai-daniel' ),
+					'errorGeneric'   => __( 'Ocurrió un error. Intenta de nuevo.', 'formulario-acelera-ai-daniel' ),
+					'successTitle'   => __( '¡Diagnóstico enviado! Cargando tu resultado…', 'formulario-acelera-ai-daniel' ),
+					'resetting'      => __( 'Reseteando…', 'formulario-acelera-ai-daniel' ),
+					'scaleLow'       => __( 'Nada listo/a', 'formulario-acelera-ai-daniel' ),
+					'scaleHigh'      => __( 'Totalmente listo/a', 'formulario-acelera-ai-daniel' ),
 				),
 			)
 		);
@@ -239,7 +239,7 @@ class Acelera_Form_Shortcode {
 				'<noscript><p class="acelera-form-noscript">%s</p></noscript>' .
 				'<div class="acelera-form-app" aria-live="polite"></div>' .
 			'</div>',
-			esc_html__( 'El formulario de diagnóstico requiere JavaScript. Activa JavaScript en tu navegador para continuar.', 'formulario-acelara-ai-daniel' )
+			esc_html__( 'El formulario de diagnóstico requiere JavaScript. Activa JavaScript en tu navegador para continuar.', 'formulario-acelera-ai-daniel' )
 		);
 
 	}
@@ -295,14 +295,14 @@ class Acelera_Form_Shortcode {
 					'</div>' .
 				'</div>' .
 			'</div>',
-			esc_html__( 'Tu orden de ejecución del curso', 'formulario-acelara-ai-daniel' ),
-			esc_html__( 'Según tu diagnóstico, este es el orden recomendado para avanzar por los módulos:', 'formulario-acelara-ai-daniel' ),
+			esc_html__( 'Tu orden de ejecución del curso', 'formulario-acelera-ai-daniel' ),
+			esc_html__( 'Según tu diagnóstico, este es el orden recomendado para avanzar por los módulos:', 'formulario-acelera-ai-daniel' ),
 			$cards,
-			esc_html__( 'Resetear diagnóstico', 'formulario-acelara-ai-daniel' ),
-			esc_html__( '¿Resetear tu diagnóstico?', 'formulario-acelara-ai-daniel' ),
-			esc_html__( 'Tu resultado actual se archivará y volverás a responder el formulario desde cero. El orden personalizado de los módulos se restablecerá.', 'formulario-acelara-ai-daniel' ),
-			esc_html__( 'Cancelar', 'formulario-acelara-ai-daniel' ),
-			esc_html__( 'Sí, resetear', 'formulario-acelara-ai-daniel' )
+			esc_html__( 'Resetear diagnóstico', 'formulario-acelera-ai-daniel' ),
+			esc_html__( '¿Resetear tu diagnóstico?', 'formulario-acelera-ai-daniel' ),
+			esc_html__( 'Tu resultado actual se archivará y volverás a responder el formulario desde cero. El orden personalizado de los módulos se restablecerá.', 'formulario-acelera-ai-daniel' ),
+			esc_html__( 'Cancelar', 'formulario-acelera-ai-daniel' ),
+			esc_html__( 'Sí, resetear', 'formulario-acelera-ai-daniel' )
 		);
 
 	}

@@ -10,8 +10,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/gate
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/gate
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -27,8 +27,8 @@ if ( ! defined( 'WPINC' ) ) {
  * directly (e.g. lesson-row overrides).
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/gate
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/gate
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
 class Acelera_Welcome_Gate {

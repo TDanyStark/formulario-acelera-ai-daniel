@@ -6,8 +6,8 @@
  * @link       https://danielamado.com
  * @since      1.0.0
  *
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/form
  */
 
 if ( ! defined( 'WPINC' ) ) {
@@ -33,8 +33,8 @@ if ( ! defined( 'WPINC' ) ) {
  * there; nothing Clientify/LLM-related lives in this class).
  *
  * @since      1.0.0
- * @package    Formulario_Acelara_Ai_Daniel
- * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
+ * @package    Formulario_Acelera_Ai_Daniel
+ * @subpackage Formulario_Acelera_Ai_Daniel/includes/form
  * @author     Daniel Amado <daniel.amadove@gmail.com>
  */
 class Acelera_Rest {
@@ -134,7 +134,7 @@ class Acelera_Rest {
 
 		return new WP_Error(
 			'acelera_not_logged_in',
-			__( 'Debes iniciar sesión para usar el formulario de diagnóstico.', 'formulario-acelara-ai-daniel' ),
+			__( 'Debes iniciar sesión para usar el formulario de diagnóstico.', 'formulario-acelera-ai-daniel' ),
 			array( 'status' => rest_authorization_required_code() )
 		);
 
@@ -166,7 +166,7 @@ class Acelera_Rest {
 			return new WP_REST_Response(
 				array(
 					'code'    => 'acelera_already_submitted',
-					'message' => __( 'Ya tienes un diagnóstico activo. Resetéalo si quieres responder de nuevo.', 'formulario-acelara-ai-daniel' ),
+					'message' => __( 'Ya tienes un diagnóstico activo. Resetéalo si quieres responder de nuevo.', 'formulario-acelera-ai-daniel' ),
 					'result'  => $this->build_result_payload(
 						(string) $existing->module_order,
 						is_array( $existing_scores ) ? $existing_scores : array(),
@@ -186,7 +186,7 @@ class Acelera_Rest {
 			return new WP_REST_Response(
 				array(
 					'code'    => 'acelera_empty_submission',
-					'message' => __( 'No se recibieron respuestas.', 'formulario-acelara-ai-daniel' ),
+					'message' => __( 'No se recibieron respuestas.', 'formulario-acelera-ai-daniel' ),
 				),
 				400
 			);
@@ -205,7 +205,7 @@ class Acelera_Rest {
 			return new WP_REST_Response(
 				array(
 					'code'    => 'acelera_validation_failed',
-					'message' => __( 'Hay respuestas inválidas o faltantes.', 'formulario-acelara-ai-daniel' ),
+					'message' => __( 'Hay respuestas inválidas o faltantes.', 'formulario-acelera-ai-daniel' ),
 					'errors'  => $field_errors,
 				),
 				400
@@ -244,7 +244,7 @@ class Acelera_Rest {
 			return new WP_REST_Response(
 				array(
 					'code'    => 'acelera_db_error',
-					'message' => __( 'No se pudo guardar el diagnóstico. Intenta de nuevo.', 'formulario-acelara-ai-daniel' ),
+					'message' => __( 'No se pudo guardar el diagnóstico. Intenta de nuevo.', 'formulario-acelera-ai-daniel' ),
 				),
 				500
 			);
@@ -333,7 +333,7 @@ class Acelera_Rest {
 			return new WP_REST_Response(
 				array(
 					'code'    => 'acelera_cv_missing',
-					'message' => __( 'No se recibió ningún archivo.', 'formulario-acelara-ai-daniel' ),
+					'message' => __( 'No se recibió ningún archivo.', 'formulario-acelera-ai-daniel' ),
 				),
 				400
 			);
@@ -346,7 +346,7 @@ class Acelera_Rest {
 			return new WP_REST_Response(
 				array(
 					'code'    => 'acelera_cv_too_big',
-					'message' => __( 'El archivo supera el tamaño máximo de 10 MB.', 'formulario-acelara-ai-daniel' ),
+					'message' => __( 'El archivo supera el tamaño máximo de 10 MB.', 'formulario-acelera-ai-daniel' ),
 				),
 				400
 			);
@@ -359,7 +359,7 @@ class Acelera_Rest {
 			return new WP_REST_Response(
 				array(
 					'code'    => 'acelera_cv_bad_type',
-					'message' => __( 'Solo se permiten archivos PDF o Word (.pdf, .doc, .docx).', 'formulario-acelara-ai-daniel' ),
+					'message' => __( 'Solo se permiten archivos PDF o Word (.pdf, .doc, .docx).', 'formulario-acelera-ai-daniel' ),
 				),
 				400
 			);
@@ -389,7 +389,7 @@ class Acelera_Rest {
 		if ( ! is_array( $result ) || isset( $result['error'] ) || empty( $result['url'] ) ) {
 			$message = ( is_array( $result ) && isset( $result['error'] ) )
 				? (string) $result['error']
-				: __( 'No se pudo subir el archivo. Intenta de nuevo.', 'formulario-acelara-ai-daniel' );
+				: __( 'No se pudo subir el archivo. Intenta de nuevo.', 'formulario-acelera-ai-daniel' );
 
 			return new WP_REST_Response(
 				array(
@@ -480,7 +480,7 @@ class Acelera_Rest {
 			return new WP_REST_Response(
 				array(
 					'code'    => 'acelera_reset_not_confirmed',
-					'message' => __( 'Debes confirmar el reseteo del diagnóstico.', 'formulario-acelara-ai-daniel' ),
+					'message' => __( 'Debes confirmar el reseteo del diagnóstico.', 'formulario-acelera-ai-daniel' ),
 				),
 				400
 			);
@@ -514,7 +514,7 @@ class Acelera_Rest {
 			return new WP_REST_Response(
 				array(
 					'code'    => 'acelera_no_submission',
-					'message' => __( 'No tienes un diagnóstico activo.', 'formulario-acelara-ai-daniel' ),
+					'message' => __( 'No tienes un diagnóstico activo.', 'formulario-acelera-ai-daniel' ),
 				),
 				404
 			);
