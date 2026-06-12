@@ -263,8 +263,8 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 		) );
 		$this->add_field( 'anthropic_api_key', __( 'API Key de Anthropic', 'formulario-acelera-ai-daniel' ), 'llm', 'api_key' );
 		$this->add_field( 'openai_api_key', __( 'API Key de OpenAI', 'formulario-acelera-ai-daniel' ), 'llm', 'api_key' );
-		$this->add_field( 'llm_model', __( 'Modelo', 'formulario-acelera-ai-daniel' ), 'llm', 'text', array(
-			'description' => __( 'Identificador del modelo aplicado al proveedor activo. Déjalo vacío para usar el default del proveedor: claude-sonnet-4-6 (Claude) o gpt-5 (OpenAI). Otros válidos: claude-haiku-4-5, claude-opus-4-6, gpt-4.1-mini, gpt-4o-mini.', 'formulario-acelera-ai-daniel' ),
+		$this->add_field( 'llm_model', __( 'Modelo', 'formulario-acelera-ai-daniel' ), 'llm', 'model_select', array(
+			'description' => __( 'Seleccioná el modelo del proveedor activo. La opción "Default del proveedor" usa claude-sonnet-4-6 (Claude) o gpt-5 (OpenAI).', 'formulario-acelera-ai-daniel' ),
 		) );
 
 		// --- Tab: Prompts ---------------------------------------------------.
@@ -352,7 +352,17 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 		}
 
 		if ( isset( $input['llm_model'] ) ) {
-			$output['llm_model'] = sanitize_text_field( $input['llm_model'] );
+			$model = sanitize_text_field( $input['llm_model'] );
+
+			$valid_models = array();
+			foreach ( self::llm_models() as $provider_models ) {
+				$valid_models = array_merge( $valid_models, array_keys( $provider_models ) );
+			}
+
+			// Allow empty (provider default) or a known model id; otherwise keep the stored value.
+			if ( '' === $model || in_array( $model, $valid_models, true ) ) {
+				$output['llm_model'] = $model;
+			}
 		}
 
 		foreach ( array_keys( Acelera_Course_Map::modules() ) as $module_key ) {
@@ -441,6 +451,48 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 						esc_html( $option_label )
 					);
 				}
+				echo '</select>';
+				break;
+
+			case 'model_select':
+				$provider = Acelera_Settings::get( 'llm_provider' );
+				$provider = in_array( $provider, array( 'claude', 'chatgpt' ), true ) ? $provider : 'claude';
+				$models   = self::llm_models();
+
+				printf( '<select id="%1$s" name="%2$s" class="acelera-llm-model">', esc_attr( $key ), esc_attr( $name ) );
+
+				// Default-of-provider option (empty stored value).
+				printf(
+					'<option value="" %1$s>%2$s</option>',
+					selected( $value, '', false ),
+					esc_html__( 'Default del proveedor', 'formulario-acelera-ai-daniel' )
+				);
+
+				foreach ( $models as $provider_key => $provider_models ) {
+					$labels = array(
+						'claude'  => __( 'Claude (Anthropic)', 'formulario-acelera-ai-daniel' ),
+						'chatgpt' => __( 'ChatGPT (OpenAI)', 'formulario-acelera-ai-daniel' ),
+					);
+
+					printf(
+						'<optgroup label="%1$s" data-provider="%2$s">',
+						esc_attr( isset( $labels[ $provider_key ] ) ? $labels[ $provider_key ] : $provider_key ),
+						esc_attr( $provider_key )
+					);
+
+					foreach ( $provider_models as $model_id => $model_label ) {
+						printf(
+							'<option value="%1$s" data-provider="%2$s" %3$s>%4$s</option>',
+							esc_attr( $model_id ),
+							esc_attr( $provider_key ),
+							selected( $value, $model_id, false ),
+							esc_html( $model_label )
+						);
+					}
+
+					echo '</optgroup>';
+				}
+
 				echo '</select>';
 				break;
 
@@ -678,7 +730,7 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 	 * @param    string $key   Setting key.
 	 * @param    string $label Field label.
 	 * @param    string $tab   Tab slug (clientify | llm | prompts | email).
-	 * @param    string $type  Field type (text | api_key | select | textarea).
+	 * @param    string $type  Field type (text | api_key | select | model_select | textarea).
 	 * @param    array  $extra Optional. Extra args (options, description).
 	 */
 	private function add_field( $key, $label, $tab, $type, $extra = array() ) {
@@ -699,6 +751,32 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 			)
 		);
 
+	}
+
+	/**
+	 * Available LLM models grouped by provider.
+	 *
+	 * Single source of truth used both to render the model <select> and to
+	 * validate the submitted model on save. The empty value ('') means
+	 * "use the provider default".
+	 *
+	 * @since    1.0.0
+	 * @return   array<string,array<string,string>> Provider key => (model id => label).
+	 */
+	public static function llm_models() {
+
+		return array(
+			'claude'  => array(
+				'claude-sonnet-4-6' => 'Claude Sonnet 4.6 (default)',
+				'claude-opus-4-6'   => 'Claude Opus 4.6',
+				'claude-haiku-4-5'  => 'Claude Haiku 4.5',
+			),
+			'chatgpt' => array(
+				'gpt-5'        => 'GPT-5 (default)',
+				'gpt-4.1-mini' => 'GPT-4.1 mini',
+				'gpt-4o-mini'  => 'GPT-4o mini',
+			),
+		);
 	}
 
 }

@@ -87,6 +87,38 @@
 				} );
 		} );
 
+		// --- LLM: filter the model <select> by the selected provider -------.
+		function filterLlmModels() {
+			var provider = $( '#llm_provider' ).val();
+			var $model = $( '.acelera-llm-model' );
+
+			if ( ! provider || ! $model.length ) {
+				return;
+			}
+
+			$model.find( 'optgroup' ).each( function() {
+				var $group = $( this );
+				var match = $group.data( 'provider' ) === provider;
+				$group.prop( 'disabled', ! match ).toggle( match );
+			} );
+
+			$model.find( 'option[data-provider]' ).each( function() {
+				var $option = $( this );
+				var match = $option.data( 'provider' ) === provider;
+				$option.prop( 'disabled', ! match ).toggle( match );
+			} );
+
+			// If the current selection belongs to another provider, fall back
+			// to the empty "provider default" option.
+			var $selected = $model.find( 'option:selected' );
+			if ( $selected.length && $selected.data( 'provider' ) && $selected.data( 'provider' ) !== provider ) {
+				$model.val( '' );
+			}
+		}
+
+		$( document ).on( 'change', '#llm_provider', filterLlmModels );
+		filterLlmModels();
+
 		// --- LLM: clear a user's cached module feedback (Fase 6.4) ---------.
 		$( document ).on( 'click', '#acelera-llm-regenerate', function() {
 			var $button = $( this );
