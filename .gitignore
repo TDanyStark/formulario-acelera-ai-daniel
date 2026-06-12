@@ -32,3 +32,4 @@ desktop.ini
 .phpunit.result.cache
 
 sfwd-lms/
+.playwright-mcp/

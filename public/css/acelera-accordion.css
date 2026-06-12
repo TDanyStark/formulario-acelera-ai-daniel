@@ -88,6 +88,79 @@
  * collapsible bodies; nothing to redeclare here.
  * -------------------------------------------------------------------- */
 
+/* ----------------------------------------------------------------------
+ * BuddyBoss sidebar adapter (JS-built accordion).
+ *
+ * The BuddyBoss theme replaces the LD30 focus sidebar with its own
+ * template (.lms-topic-sidebar-wrapper > .lms-lessions-list — typo is
+ * theirs), so the markup above is rebuilt client-side by
+ * acelera-accordion.js. Everything here is scoped to
+ * .lms-lessions-list so nothing leaks outside the BB sidebar; the
+ * generic .acelera-section-toggle / .acelera-section-body /
+ * .acelera-chevron rules above also apply to the JS-built markup.
+ * -------------------------------------------------------------------- */
+
+/* The adapter inserts plain structural <li>s inside BB's ol — reset them. */
+.lms-lessions-list li.acelera-bb-section,
+.lms-lessions-list li.acelera-bb-section-body {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.lms-lessions-list .acelera-bb-section .ld-item-list-section-heading {
+	margin: 0;
+}
+
+/* BB headings are <h3>; the toggle button lives inside and inherits. */
+.lms-lessions-list .acelera-bb-section .ld-lesson-section-heading {
+	display: block;
+	margin: 0;
+}
+
+.lms-lessions-list .acelera-section-toggle {
+	padding: 0.25em 0;
+}
+
+/* Nested ol holding the section's lesson rows (collapse wrapper). */
+.lms-lessions-list ol.acelera-section-body-inner {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* SVG chevron (BB sidebar may not ship the ld-icon font). */
+.lms-lessions-list .acelera-chevron-svg {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.lms-lessions-list .acelera-chevron-svg svg {
+	display: block;
+}
+
+/* Gate-locked lessons inside the BB sidebar. The generic .acelera-locked
+ * rule dims the whole li, but in BB markup the section heading of a
+ * non-collapsible module (m1) lives INSIDE its first lesson li — dim only
+ * the anchor here so headings stay readable. The LD30 lock-icon selectors
+ * do not match BB markup either, so re-add the icon on the anchor. */
+.lms-lessions-list li.acelera-locked {
+	opacity: 1;
+	cursor: default;
+}
+
+.lms-lessions-list li.acelera-locked a {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.lms-lessions-list li.acelera-locked > a::after {
+	content: '\1F512'; /* 🔒 */
+	font-size: 0.85em;
+	margin-left: 0.4em;
+}
+
 @media (prefers-reduced-motion: reduce) {
 
 	.acelera-section-body {

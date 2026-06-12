@@ -141,6 +141,177 @@ class Formulario_Acelara_Ai_Daniel_Public {
 			)
 		);
 
+		// BuddyBoss sidebar adapter data (the theme replaces the LD30
+		// focus sidebar with its own template, so the Fase 3 template
+		// overrides never render there; acelera-accordion.js rebuilds
+		// the accordion client-side from this object).
+		wp_localize_script(
+			$this->plugin_name . '-accordion',
+			'aceleraSidebar',
+			$this->build_sidebar_localization()
+		);
+
+	}
+
+	/**
+	 * Build the `aceleraSidebar` localization for the BuddyBoss adapter.
+	 *
+	 * Lessons are referenced by permalink PATHNAME (host-agnostic,
+	 * trailing-slash normalized) because the BuddyBoss sidebar markup
+	 * carries no lesson IDs — only permalinks.
+	 *
+	 * Shape:
+	 * - modules:       ordered per the current user's visual order (their
+	 *                  `acelera_module_order` when a submission is active,
+	 *                  natural m1..m5 otherwise). Each item: {key, label,
+	 *                  collapsible} where label is the DISPLAY label
+	 *                  (renumbered per user, or the natural "Módulo N. {tema}").
+	 *                  m1 is never collapsible (always expanded, like LD30).
+	 * - lessonModules: permalink path → module key ('welcome' or 'm1'..'m5')
+	 *                  for every welcome + module lesson.
+	 * - lockedPaths:   permalink paths of the lessons currently locked by
+	 *                  the welcome gate (empty once the gate is passed).
+	 * - currentPath:   permalink path of the lesson governing the current
+	 *                  singular request ('' outside lesson/topic/quiz).
+	 * - strings:       UI strings (lock tooltip, toggle hint).
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @return   array
+	 */
+	private function build_sidebar_localization() {
+
+		$user_id     = get_current_user_id();
+		$modules_map = Acelera_Course_Map::modules();
+		$natural     = array_keys( $modules_map );
+
+		$order  = $natural;
+		$labels = array();
+
+		if ( $user_id > 0 && class_exists( 'Acelera_Renaming' ) ) {
+
+			$user_order = Acelera_Renaming::get_user_order( $user_id );
+
+			if ( array() !== $user_order ) {
+				$order  = $user_order;
+				$labels = Acelera_Renaming::get_user_labels( $user_id );
+			}
+		}
+
+		$modules = array();
+
+		foreach ( $order as $key ) {
+
+			if ( ! isset( $modules_map[ $key ] ) ) {
+				continue;
+			}
+
+			$natural_number = (int) array_search( $key, $natural, true ) + 1;
+
+			$modules[] = array(
+				'key'         => $key,
+				'label'       => isset( $labels[ $key ] )
+					? $labels[ $key ]
+					: sprintf( 'Módulo %d. %s', $natural_number, $modules_map[ $key ]['label'] ),
+				'collapsible' => ( 'm1' !== $key ),
+			);
+		}
+
+		$lesson_modules = array();
+
+		foreach ( Acelera_Course_Map::WELCOME_LESSONS as $lesson_id ) {
+
+			$path = $this->lesson_path( $lesson_id );
+
+			if ( '' !== $path ) {
+				$lesson_modules[ $path ] = 'welcome';
+			}
+		}
+
+		foreach ( $modules_map as $key => $module ) {
+			foreach ( $module['lessons'] as $lesson_id ) {
+
+				$path = $this->lesson_path( $lesson_id );
+
+				if ( '' !== $path ) {
+					$lesson_modules[ $path ] = $key;
+				}
+			}
+		}
+
+		// Locked paths: skip the whole computation once the gate is passed
+		// (same condition as aceleraGate.lockedLessons above).
+		$locked_paths = array();
+
+		if (
+			$user_id > 0
+			&& class_exists( 'Acelera_Welcome_Gate' )
+			&& ! Acelera_Welcome_Gate::is_welcome_completed( $user_id )
+			&& ! Acelera_Welcome_Gate::user_can_bypass( $user_id )
+		) {
+			foreach ( Acelera_Course_Map::all_module_lessons() as $lesson_id ) {
+
+				if ( ! Acelera_Welcome_Gate::is_lesson_locked( $lesson_id, $user_id ) ) {
+					continue;
+				}
+
+				$path = $this->lesson_path( $lesson_id );
+
+				if ( '' !== $path ) {
+					$locked_paths[] = $path;
+				}
+			}
+		}
+
+		$current_path      = '';
+		$current_lesson_id = class_exists( 'Acelera_Template_Loader' )
+			? Acelera_Template_Loader::current_lesson_id( Acelera_Course_Map::COURSE_ID )
+			: 0;
+
+		if ( $current_lesson_id > 0 ) {
+			$current_path = $this->lesson_path( $current_lesson_id );
+		}
+
+		return array(
+			'modules'       => $modules,
+			'lessonModules' => $lesson_modules,
+			'lockedPaths'   => array_values( $locked_paths ),
+			'currentPath'   => $current_path,
+			'strings'       => array(
+				'tooltip'       => __( 'Completa Bienvenida primero', 'formulario-acelara-ai-daniel' ),
+				'toggleSection' => __( 'Mostrar u ocultar las lecciones de la sección', 'formulario-acelara-ai-daniel' ),
+			),
+		);
+
+	}
+
+	/**
+	 * Permalink pathname of a post, trailing-slash normalized.
+	 *
+	 * Host-agnostic on purpose: the BuddyBoss adapter matches sidebar
+	 * anchors by pathname so staging/production hosts both work.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @param    int $post_id Post ID.
+	 * @return   string Pathname (e.g. '/lessons/foo/') or '' when unresolvable.
+	 */
+	private function lesson_path( $post_id ) {
+
+		$permalink = get_permalink( (int) $post_id );
+
+		if ( ! $permalink ) {
+			return '';
+		}
+
+		$path = wp_parse_url( $permalink, PHP_URL_PATH );
+
+		if ( ! is_string( $path ) || '' === $path ) {
+			return '';
+		}
+
+		return trailingslashit( $path );
+
 	}
 
 	/* ---------------------------------------------------------------------
