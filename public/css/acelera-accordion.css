@@ -116,12 +116,11 @@
 .lms-lessions-list .acelera-bb-section .ld-lesson-section-heading {
 	display: block;
 	margin: 0;
-	padding-left: 15px;
-	padding-right: 15px;
+
 }
 
 .lms-lessions-list .acelera-section-toggle {
-	padding: 0.25em 0;
+	padding: 0.25em 15px;
 }
 
 /* Nested ol holding the section's lesson rows (collapse wrapper). */
