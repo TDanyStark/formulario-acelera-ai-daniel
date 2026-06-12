@@ -58,10 +58,13 @@ class Acelera_Email {
 			return false;
 		}
 
-		// Greeting name: P0.1 answer, fallback WP display name.
+		// Greeting name: prefer the first name only (P0.1a), then the
+		// legacy/derived P0.1 full name, then the WP display name.
 		$name = '';
 
-		if ( ! empty( $answers['p0_1'] ) && is_string( $answers['p0_1'] ) ) {
+		if ( ! empty( $answers['p0_1a'] ) && is_string( $answers['p0_1a'] ) ) {
+			$name = $answers['p0_1a'];
+		} elseif ( ! empty( $answers['p0_1'] ) && is_string( $answers['p0_1'] ) ) {
 			$name = $answers['p0_1'];
 		} elseif ( $user ) {
 			$name = $user->display_name;

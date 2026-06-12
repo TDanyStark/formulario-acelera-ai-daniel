@@ -157,10 +157,23 @@ class Acelera_Form_Shortcode {
 		$handle = $this->plugin_name . '-form';
 		$base   = plugin_dir_url( dirname( __FILE__, 2 ) ) . 'public/';
 
-		wp_enqueue_style( $handle, $base . 'css/acelera-form.css', array(), $this->asset_version( 'public/css/acelera-form.css' ), 'all' );
-		wp_enqueue_script( $handle, $base . 'js/acelera-form.js', array(), $this->asset_version( 'public/js/acelera-form.js' ), true );
+		// intl-tel-input (local vendor copy, v18) — enqueued before the form
+		// script so the form can depend on window.intlTelInput being ready.
+		$iti_handle = $this->plugin_name . '-intl-tel-input';
+		$iti_base   = $base . 'vendor/intl-tel-input/';
+
+		wp_enqueue_style( $iti_handle, $iti_base . 'css/intlTelInput.min.css', array(), $this->asset_version( 'public/vendor/intl-tel-input/css/intlTelInput.min.css' ), 'all' );
+		wp_enqueue_script( $iti_handle, $iti_base . 'js/intlTelInput.min.js', array(), $this->asset_version( 'public/vendor/intl-tel-input/js/intlTelInput.min.js' ), true );
+
+		wp_enqueue_style( $handle, $base . 'css/acelera-form.css', array( $iti_handle ), $this->asset_version( 'public/css/acelera-form.css' ), 'all' );
+		wp_enqueue_script( $handle, $base . 'js/acelera-form.js', array( $iti_handle ), $this->asset_version( 'public/js/acelera-form.js' ), true );
 
 		$user = wp_get_current_user();
+
+		// Prefill the WhatsApp number from the user's most recent WooCommerce
+		// billing phone (e.g. "+573042465482"), used by intl-tel-input to
+		// auto-detect the country flag and national number.
+		$woo_phone = $this->get_user_billing_phone( (int) $user->ID );
 
 		$result = null;
 
@@ -187,9 +200,12 @@ class Acelera_Form_Shortcode {
 				'result'  => $result,
 				'questions' => Acelera_Questions::all(),
 				'prefill'   => array(
-					'p0_1' => (string) $user->display_name,
-					'p0_2' => (string) $user->user_email,
+					'p0_1a' => (string) $user->first_name,
+					'p0_1b' => (string) $user->last_name,
+					'p0_2'  => (string) $user->user_email,
+					'p0_3'  => (string) $woo_phone,
 				),
+				'intlUtilsUrl' => $iti_base . 'js/utils.js',
 				'strings'   => array(
 					'back'           => __( 'Atrás', 'formulario-acelera-ai-daniel' ),
 					'skip'           => __( 'Omitir', 'formulario-acelera-ai-daniel' ),

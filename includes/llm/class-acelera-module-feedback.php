@@ -473,6 +473,10 @@ class Acelera_Module_Feedback {
 	 */
 	private function resolve_display_name( $user_id, $context ) {
 
+		if ( is_array( $context ) && ! empty( $context['answers']['p0_1a'] ) && is_string( $context['answers']['p0_1a'] ) ) {
+			return trim( $context['answers']['p0_1a'] );
+		}
+
 		if ( is_array( $context ) && ! empty( $context['answers']['p0_1'] ) && is_string( $context['answers']['p0_1'] ) ) {
 			return trim( $context['answers']['p0_1'] );
 		}

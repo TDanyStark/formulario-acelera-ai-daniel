@@ -118,16 +118,32 @@ class Acelera_Questions {
 			 * BLOQUE 0 · Datos de contacto (siempre visible)
 			 * ---------------------------------------------------------- */
 			array(
-				'id'        => 'p0_1',
-				'block'     => 0,
-				'type'      => 'text',
-				'label'     => 'Nombre completo',
-				'required'  => true,
-				'max'       => null,
-				'options'   => null,
-				'show_if'   => null,
-				'skippable' => false,
-				'prefill'   => 'display_name',
+				'id'             => 'p0_1a',
+				'block'          => 0,
+				'type'           => 'text',
+				'label'          => 'Nombre',
+				'required'       => true,
+				'max'            => null,
+				'options'        => null,
+				'show_if'        => null,
+				'skippable'      => false,
+				'prefill'        => 'first_name',
+				'group'          => 'nombre_completo',
+				'group_position' => 'first',
+			),
+			array(
+				'id'             => 'p0_1b',
+				'block'          => 0,
+				'type'           => 'text',
+				'label'          => 'Apellido',
+				'required'       => true,
+				'max'            => null,
+				'options'        => null,
+				'show_if'        => null,
+				'skippable'      => false,
+				'prefill'        => 'last_name',
+				'group'          => 'nombre_completo',
+				'group_position' => 'second',
 			),
 			array(
 				'id'        => 'p0_2',
@@ -1132,6 +1148,21 @@ class Acelera_Questions {
 
 		if ( $errors->has_errors() ) {
 			return $errors;
+		}
+
+		// Backward compatibility: the legacy "Nombre completo" question
+		// (p0_1) was split into p0_1a (Nombre) + p0_1b (Apellido). Several
+		// consumers (email greeting, LLM context, Clientify note) still read
+		// p0_1, so derive it here from the two new fields. Not a visible
+		// question — only injected into the sanitized payload.
+		if ( isset( $sanitized['p0_1a'] ) || isset( $sanitized['p0_1b'] ) ) {
+			$first = isset( $sanitized['p0_1a'] ) ? (string) $sanitized['p0_1a'] : '';
+			$last  = isset( $sanitized['p0_1b'] ) ? (string) $sanitized['p0_1b'] : '';
+			$full  = trim( $first . ' ' . $last );
+
+			if ( '' !== $full ) {
+				$sanitized['p0_1'] = $full;
+			}
 		}
 
 		return $sanitized;

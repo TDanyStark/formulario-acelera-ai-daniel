@@ -33,13 +33,85 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php endforeach; ?>
 	</nav>
 
-	<form method="post" action="options.php">
-		<?php
-		settings_fields( 'acelera_settings' );
-		do_settings_sections( 'acelera-settings-' . $active_tab );
-		submit_button();
-		?>
-	</form>
+	<?php if ( 'ayuda' !== $active_tab ) : ?>
+		<form method="post" action="options.php">
+			<?php
+			settings_fields( 'acelera_settings' );
+			do_settings_sections( 'acelera-settings-' . $active_tab );
+			submit_button();
+			?>
+		</form>
+	<?php endif; ?>
+
+	<?php if ( 'ayuda' === $active_tab ) : ?>
+		<h2><?php esc_html_e( 'Shortcodes disponibles', 'formulario-acelera-ai-daniel' ); ?></h2>
+		<p class="description">
+			<?php esc_html_e( 'Copia el shortcode y pégalo en la página o clase donde quieras mostrar el contenido.', 'formulario-acelera-ai-daniel' ); ?>
+		</p>
+
+		<table class="widefat striped" style="max-width:820px;margin-top:12px;">
+			<thead>
+				<tr>
+					<th style="width:220px;"><?php esc_html_e( 'Shortcode', 'formulario-acelera-ai-daniel' ); ?></th>
+					<th><?php esc_html_e( 'Descripción', 'formulario-acelera-ai-daniel' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						<code class="acelera-shortcode-code">[acelera_form]</code>
+						<button type="button" class="button button-small acelera-copy-shortcode" data-shortcode="[acelera_form]">
+							<?php esc_html_e( 'Copiar', 'formulario-acelera-ai-daniel' ); ?>
+						</button>
+					</td>
+					<td>
+						<?php esc_html_e( 'Formulario de diagnóstico ACELERA. Muestra el formulario por pasos al alumno; una vez enviado, muestra automáticamente la pantalla de resultado con su orden personalizado de módulos. Colócalo en una página accesible solo para alumnos logueados.', 'formulario-acelera-ai-daniel' ); ?>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code class="acelera-shortcode-code">[acelera_feedback]</code>
+						<button type="button" class="button button-small acelera-copy-shortcode" data-shortcode="[acelera_feedback]">
+							<?php esc_html_e( 'Copiar', 'formulario-acelera-ai-daniel' ); ?>
+						</button>
+					</td>
+					<td>
+						<?php esc_html_e( 'Feedback personalizado por módulo generado con IA (LLM). Colócalo dentro de la clase/lección de un módulo; tomará automáticamente el módulo según la lección actual y el diagnóstico del alumno.', 'formulario-acelera-ai-daniel' ); ?>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<p class="description" style="margin-top:16px;">
+			<?php esc_html_e( 'Nota: ambos shortcodes requieren que el alumno haya iniciado sesión.', 'formulario-acelera-ai-daniel' ); ?>
+		</p>
+
+		<script>
+		( function () {
+			document.querySelectorAll( '.acelera-copy-shortcode' ).forEach( function ( btn ) {
+				btn.addEventListener( 'click', function () {
+					var code = btn.getAttribute( 'data-shortcode' );
+					var done = function () {
+						var original = btn.textContent;
+						btn.textContent = <?php echo wp_json_encode( __( '¡Copiado!', 'formulario-acelera-ai-daniel' ) ); ?>;
+						setTimeout( function () { btn.textContent = original; }, 1500 );
+					};
+					if ( navigator.clipboard && navigator.clipboard.writeText ) {
+						navigator.clipboard.writeText( code ).then( done, done );
+					} else {
+						var ta = document.createElement( 'textarea' );
+						ta.value = code;
+						document.body.appendChild( ta );
+						ta.select();
+						try { document.execCommand( 'copy' ); } catch ( e ) {}
+						document.body.removeChild( ta );
+						done();
+					}
+				} );
+			} );
+		}() );
+		</script>
+	<?php endif; ?>
 
 	<?php if ( 'clientify' === $active_tab ) : ?>
 		<hr>

@@ -332,7 +332,7 @@
 
 .acelera-form-btn--ghost:not(:disabled):hover {
 	border-color: var(--acelera-form-accent);
-	color: var(--acelera-form-accent);
+	color: white;
 }
 
 .acelera-form-btn--danger {

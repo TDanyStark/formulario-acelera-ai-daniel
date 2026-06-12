@@ -250,9 +250,11 @@ class Acelera_Clientify {
 	 */
 	public static function build_contact_payload( array $answers ) {
 
-		list( $first_name, $last_name ) = self::split_name(
-			isset( $answers['p0_1'] ) ? (string) $answers['p0_1'] : ''
-		);
+		// The contact name now comes from the dedicated split fields
+		// (p0_1a = Nombre, p0_1b = Apellido). split_name() is kept for
+		// other potential callers but is no longer used for the payload.
+		$first_name = isset( $answers['p0_1a'] ) ? (string) $answers['p0_1a'] : '';
+		$last_name  = isset( $answers['p0_1b'] ) ? (string) $answers['p0_1b'] : '';
 
 		$tags_raw = (string) Acelera_Settings::get( 'clientify_tags' );
 		$tags     = array_values( array_filter( array_map( 'trim', explode( ',', $tags_raw ) ) ) );

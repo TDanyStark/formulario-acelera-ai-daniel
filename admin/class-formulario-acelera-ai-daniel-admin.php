@@ -391,6 +391,7 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 			'llm'       => __( 'LLM', 'formulario-acelera-ai-daniel' ),
 			'prompts'   => __( 'Prompts', 'formulario-acelera-ai-daniel' ),
 			'email'     => __( 'Email', 'formulario-acelera-ai-daniel' ),
+			'ayuda'     => __( 'Ayuda / Uso', 'formulario-acelera-ai-daniel' ),
 		);
 
 		$active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'clientify'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
