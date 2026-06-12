@@ -242,6 +242,55 @@ class Acelera_Form_Shortcode {
 	}
 
 	/**
+	 * Resolve the user's billing phone for the WhatsApp prefill.
+	 *
+	 * Prefers the billing phone of the most recent WooCommerce order, then
+	 * falls back to the `billing_phone` user meta. Returns '' when nothing
+	 * is available or WooCommerce is not active.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  int $user_id WordPress user ID.
+	 * @return string Phone number (raw, may be empty).
+	 */
+	private function get_user_billing_phone( $user_id ) {
+
+		if ( $user_id <= 0 ) {
+			return '';
+		}
+
+		// Most recent WooCommerce order's billing phone.
+		if ( function_exists( 'wc_get_orders' ) ) {
+			$orders = wc_get_orders(
+				array(
+					'customer_id' => $user_id,
+					'limit'       => 1,
+					'orderby'     => 'date',
+					'order'       => 'DESC',
+				)
+			);
+
+			if ( is_array( $orders ) && ! empty( $orders ) ) {
+				$order = $orders[0];
+
+				if ( is_object( $order ) && method_exists( $order, 'get_billing_phone' ) ) {
+					$phone = trim( (string) $order->get_billing_phone() );
+
+					if ( '' !== $phone ) {
+						return $phone;
+					}
+				}
+			}
+		}
+
+		// Fallback: billing_phone user meta.
+		$meta_phone = trim( (string) get_user_meta( $user_id, 'billing_phone', true ) );
+
+		return '' !== $meta_phone ? $meta_phone : '';
+
+	}
+
+	/**
 	 * State 2 markup — container for the JS step form.
 	 *
 	 * @since  1.0.0
