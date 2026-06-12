@@ -13,6 +13,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes/config
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Hardcoded map of the ACELERA course structure.
  *

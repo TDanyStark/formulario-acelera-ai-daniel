@@ -10,6 +10,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Read access to the serialized `acelera_settings` option.
  *

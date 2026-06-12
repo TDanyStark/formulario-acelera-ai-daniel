@@ -10,6 +10,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Sends the personalized "orden de ejecución" email after a submission.
  *

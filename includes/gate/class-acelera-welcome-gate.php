@@ -14,6 +14,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes/gate
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Welcome gate state helper.
  *

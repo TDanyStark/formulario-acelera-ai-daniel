@@ -10,6 +10,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Redirects LD30 navigation widget templates to plugin overrides (Fase 3).
  *

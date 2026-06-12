@@ -14,6 +14,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Hardcoded ACELERA form definition + conditional engine + server validation.
  *

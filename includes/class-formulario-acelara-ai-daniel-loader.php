@@ -10,6 +10,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Register all actions and filters for the plugin.
  *

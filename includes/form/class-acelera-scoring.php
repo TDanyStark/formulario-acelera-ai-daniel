@@ -13,6 +13,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Scores the 5 ACELERA routes (0–100) and produces the personalized
  * module order plus special-rule flags.

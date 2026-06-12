@@ -11,6 +11,10 @@
  * @package    Formulario_Acelara_Ai_Daniel
  * @subpackage Formulario_Acelara_Ai_Daniel/public/partials
  */
+
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 ?>
 
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->

@@ -10,6 +10,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes/form
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Namespace `acelera/v1` — submit, upload-cv, reset and result endpoints.
  *
@@ -148,6 +152,31 @@ class Acelera_Rest {
 	public function handle_submit( WP_REST_Request $request ) {
 
 		$user_id = get_current_user_id();
+		$repo    = new Acelera_Submissions_Repo();
+
+		// Double-submit guard (Fase 7 audit): an active submission already
+		// exists → 409 with the existing result instead of a second row.
+		// The user must /reset first to submit again.
+		$existing = $repo->get_active_for_user( $user_id );
+
+		if ( $existing ) {
+			$existing_scores = json_decode( (string) $existing->scores, true );
+			$existing_flags  = json_decode( (string) $existing->flags, true );
+
+			return new WP_REST_Response(
+				array(
+					'code'    => 'acelera_already_submitted',
+					'message' => __( 'Ya tienes un diagnóstico activo. Resetéalo si quieres responder de nuevo.', 'formulario-acelara-ai-daniel' ),
+					'result'  => $this->build_result_payload(
+						(string) $existing->module_order,
+						is_array( $existing_scores ) ? $existing_scores : array(),
+						is_array( $existing_flags ) ? $existing_flags : array()
+					),
+				),
+				409
+			);
+		}
+
 		$params  = $request->get_json_params();
 		$answers = ( is_array( $params ) && isset( $params['answers'] ) && is_array( $params['answers'] ) )
 			? $params['answers']
@@ -187,8 +216,20 @@ class Acelera_Rest {
 		$scoring = Acelera_Scoring::score( $clean );
 
 		// 3. Persist the submission.
-		$repo   = new Acelera_Submissions_Repo();
 		$cv_url = ( isset( $clean['cv_upload'] ) && is_string( $clean['cv_upload'] ) ) ? $clean['cv_upload'] : null;
+
+		// Defense in depth (Fase 7 audit): the CV answer is a URL the
+		// client controls — only accept files hosted in THIS user's own
+		// acelera-cv folder; anything else is dropped silently.
+		if ( null !== $cv_url ) {
+			$uploads     = wp_get_upload_dir();
+			$expected_cv = trailingslashit( $uploads['baseurl'] ) . 'acelera-cv/' . $user_id . '/';
+
+			if ( 0 !== strpos( $cv_url, $expected_cv ) ) {
+				$cv_url = null;
+				unset( $clean['cv_upload'] );
+			}
+		}
 
 		$submission_id = $repo->insert(
 			$user_id,
@@ -341,6 +382,10 @@ class Acelera_Rest {
 
 		remove_filter( 'upload_dir', array( $this, 'filter_cv_upload_dir' ) );
 
+		// Directory-listing hardening: drop an empty index.php in the base
+		// acelera-cv dir and in the per-user dir (created by the upload).
+		$this->protect_cv_upload_dirs();
+
 		if ( ! is_array( $result ) || isset( $result['error'] ) || empty( $result['url'] ) ) {
 			$message = ( is_array( $result ) && isset( $result['error'] ) )
 				? (string) $result['error']
@@ -362,6 +407,36 @@ class Acelera_Rest {
 			),
 			200
 		);
+
+	}
+
+	/**
+	 * Ensure index.php silence files exist in the CV upload directories.
+	 *
+	 * Covers uploads/acelera-cv/ and uploads/acelera-cv/{user_id}/ so a
+	 * server with directory listing enabled never exposes uploaded CVs.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @return void
+	 */
+	private function protect_cv_upload_dirs() {
+
+		$uploads = wp_get_upload_dir();
+		$base    = trailingslashit( $uploads['basedir'] ) . 'acelera-cv';
+		$dirs    = array( $base, $base . '/' . get_current_user_id() );
+
+		foreach ( $dirs as $dir ) {
+			if ( ! is_dir( $dir ) ) {
+				continue;
+			}
+
+			$index = $dir . '/index.php';
+
+			if ( ! file_exists( $index ) ) {
+				@file_put_contents( $index, "<?php // Silence is golden\n" ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			}
+		}
 
 	}
 

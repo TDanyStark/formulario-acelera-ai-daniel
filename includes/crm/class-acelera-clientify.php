@@ -10,6 +10,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes/crm
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * HTTP client for the Clientify v2 API + note HTML builder.
  *

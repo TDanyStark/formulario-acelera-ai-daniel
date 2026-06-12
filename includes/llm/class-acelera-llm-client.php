@@ -10,6 +10,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes/llm
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Thin HTTP client over the Anthropic Messages API and the OpenAI Chat
  * Completions API.

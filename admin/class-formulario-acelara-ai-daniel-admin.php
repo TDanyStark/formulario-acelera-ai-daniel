@@ -10,6 +10,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/admin
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * The admin-specific functionality of the plugin.
  *

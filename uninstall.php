@@ -32,9 +32,25 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 global $wpdb;
 
+// Clear every pending Clientify cron event (any args).
+wp_unschedule_hook( 'acelera_send_to_clientify' );
+
 // Delete plugin options.
 delete_option( 'acelera_settings' );
 delete_option( 'acelera_db_version' );
+
+// Delete plugin transients (Clientify last-error + LLM locks) directly:
+// get/delete_transient can't enumerate by prefix, so a LIKE delete on the
+// options table (value + timeout rows) is the reliable cleanup.
+$wpdb->query(
+	$wpdb->prepare(
+		"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
+		$wpdb->esc_like( '_transient_acelera_clientify_err_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_acelera_clientify_err_' ) . '%',
+		$wpdb->esc_like( '_transient_acelera_llm_lock_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_acelera_llm_lock_' ) . '%'
+	)
+);
 
 // Delete every user meta created by the plugin (acelera_ prefix).
 $wpdb->query(

@@ -909,6 +909,15 @@
 					return;
 				}
 
+				// Double-submit race: an active submission already exists on the
+				// server (409). Treat it like success — the result is already
+				// there, so reload and let PHP render the result screen.
+				if ( 409 === response.status && response.data && 'acelera_already_submitted' === response.data.code ) {
+					clearProgress();
+					window.location.reload();
+					return;
+				}
+
 				state.submitting = false;
 
 				if ( 400 === response.status && response.data && response.data.errors ) {

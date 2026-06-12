@@ -10,6 +10,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/public
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * The public-facing functionality of the plugin.
  *

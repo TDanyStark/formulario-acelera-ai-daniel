@@ -10,6 +10,10 @@
  * @subpackage Formulario_Acelara_Ai_Daniel/includes/llm
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * [acelera_feedback module="mX"] shortcode and its REST backend.
  *
