@@ -264,7 +264,7 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 		$this->add_field( 'anthropic_api_key', __( 'API Key de Anthropic', 'formulario-acelera-ai-daniel' ), 'llm', 'api_key' );
 		$this->add_field( 'openai_api_key', __( 'API Key de OpenAI', 'formulario-acelera-ai-daniel' ), 'llm', 'api_key' );
 		$this->add_field( 'llm_model', __( 'Modelo', 'formulario-acelera-ai-daniel' ), 'llm', 'model_select', array(
-			'description' => __( 'Seleccioná el modelo del proveedor activo. La opción "Default del proveedor" usa claude-sonnet-4-6 (Claude) o gpt-5 (OpenAI).', 'formulario-acelera-ai-daniel' ),
+			'description' => __( 'La lista se consulta en vivo a la API del proveedor (con la API key configurada) y se cachea 12 h. Si no hay key o la API falla, se usa una lista de respaldo. La opción "Default del proveedor" usa claude-sonnet-4-6 (Claude) o gpt-5 (OpenAI).', 'formulario-acelera-ai-daniel' ),
 		) );
 
 		// --- Tab: Prompts ---------------------------------------------------.
@@ -322,6 +322,10 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 
 		$output = $existing;
 
+		// Track whether an LLM API key actually changes so we can drop the
+		// cached model lists (a new/different key may expose other models).
+		$llm_key_changed = false;
+
 		// API keys: keep the stored value when the masked placeholder comes back.
 		foreach ( $this->api_key_fields as $key ) {
 			if ( ! isset( $input[ $key ] ) ) {
@@ -334,7 +338,18 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 				continue; // Masked placeholder submitted: keep stored value.
 			}
 
-			$output[ $key ] = sanitize_text_field( $value );
+			$value = sanitize_text_field( $value );
+
+			if ( in_array( $key, array( 'anthropic_api_key', 'openai_api_key' ), true )
+				&& ( ! isset( $existing[ $key ] ) || $existing[ $key ] !== $value ) ) {
+				$llm_key_changed = true;
+			}
+
+			$output[ $key ] = $value;
+		}
+
+		if ( $llm_key_changed && class_exists( 'Acelera_LLM_Client' ) ) {
+			Acelera_LLM_Client::flush_models_cache();
 		}
 
 		if ( isset( $input['clientify_owner'] ) ) {
@@ -359,8 +374,11 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 				$valid_models = array_merge( $valid_models, array_keys( $provider_models ) );
 			}
 
-			// Allow empty (provider default) or a known model id; otherwise keep the stored value.
-			if ( '' === $model || in_array( $model, $valid_models, true ) ) {
+			// Allow empty (provider default), a known model id from the
+			// (dynamic or static) list, or a plausibly-shaped id the live
+			// API may know about even when the cache is empty (e.g. a key
+			// pasted in this same submit). Otherwise keep the stored value.
+			if ( '' === $model || in_array( $model, $valid_models, true ) || self::looks_like_model_id( $model ) ) {
 				$output['llm_model'] = $model;
 			}
 		}
@@ -756,14 +774,43 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 	/**
 	 * Available LLM models grouped by provider.
 	 *
-	 * Single source of truth used both to render the model <select> and to
-	 * validate the submitted model on save. The empty value ('') means
-	 * "use the provider default".
+	 * Used both to render the model <select> and to validate the
+	 * submitted model on save. Each provider's list is fetched live from
+	 * its API (cached 12h by Acelera_LLM_Client); when the API is
+	 * unavailable (no key, network error) it falls back to the static
+	 * list in llm_models_static(). The empty value ('') means "use the
+	 * provider default".
 	 *
 	 * @since    1.0.0
 	 * @return   array<string,array<string,string>> Provider key => (model id => label).
 	 */
 	public static function llm_models() {
+
+		$static = self::llm_models_static();
+		$models = array();
+
+		foreach ( array( 'claude', 'chatgpt' ) as $provider ) {
+			$dynamic = class_exists( 'Acelera_LLM_Client' )
+				? Acelera_LLM_Client::fetch_models( $provider )
+				: array();
+
+			$models[ $provider ] = ! empty( $dynamic ) ? $dynamic : $static[ $provider ];
+		}
+
+		return $models;
+	}
+
+	/**
+	 * Static fallback list of LLM models grouped by provider.
+	 *
+	 * Used when the provider API cannot be queried (no API key yet, or a
+	 * transient network failure). Model names verified against the
+	 * official docs, June 2026.
+	 *
+	 * @since    1.0.0
+	 * @return   array<string,array<string,string>> Provider key => (model id => label).
+	 */
+	public static function llm_models_static() {
 
 		return array(
 			'claude'  => array(
@@ -777,6 +824,30 @@ class Formulario_Acelera_Ai_Daniel_Admin {
 				'gpt-4o-mini'  => 'GPT-4o mini',
 			),
 		);
+	}
+
+	/**
+	 * Whether a string is a plausibly-shaped Claude/OpenAI model id.
+	 *
+	 * Used as a permissive on-save guard so a model selected from the
+	 * live dropdown is accepted even when the validation cache is empty
+	 * (e.g. an API key pasted in the same request). It only checks the
+	 * shape (provider prefix + safe charset), never the API.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @param    string $model Submitted model id.
+	 * @return   bool
+	 */
+	private static function looks_like_model_id( $model ) {
+
+		if ( ! preg_match( '/^[a-z0-9._-]{2,80}$/i', $model ) ) {
+			return false;
+		}
+
+		return ( 0 === strpos( $model, 'claude-' ) )
+			|| ( 0 === strpos( $model, 'gpt-' ) )
+			|| (bool) preg_match( '/^o\d/', $model );
 	}
 
 }

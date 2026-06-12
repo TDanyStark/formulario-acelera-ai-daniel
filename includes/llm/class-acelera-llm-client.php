@@ -68,6 +68,32 @@ class Acelera_LLM_Client {
 	const TIMEOUT = 30;
 
 	/**
+	 * Shorter HTTP timeout for the model-listing requests, in seconds.
+	 *
+	 * The settings screen blocks on this call, so keep it tight.
+	 *
+	 * @since 1.0.0
+	 * @var   int
+	 */
+	const LIST_TIMEOUT = 8;
+
+	/**
+	 * Transient key prefix for the cached per-provider model list.
+	 *
+	 * @since 1.0.0
+	 * @var   string
+	 */
+	const MODELS_TRANSIENT_PREFIX = 'acelera_llm_models_';
+
+	/**
+	 * Lifetime of the cached model list, in seconds (12 hours).
+	 *
+	 * @since 1.0.0
+	 * @var   int
+	 */
+	const MODELS_TTL = 43200;
+
+	/**
 	 * Maximum tokens requested from the model.
 	 *
 	 * @since 1.0.0
@@ -135,6 +161,211 @@ class Acelera_LLM_Client {
 			(string) Acelera_Settings::get( 'llm_provider', 'claude' ),
 			(string) Acelera_Settings::get( 'llm_model', '' )
 		);
+
+	}
+
+	/**
+	 * List available models for a provider (cached 12h).
+	 *
+	 * Queries the provider's list-models endpoint and returns an
+	 * ordered map of model id => human label. Results are cached in a
+	 * transient; on any failure (no key, HTTP error, malformed body)
+	 * an empty array is returned so callers can fall back to a static
+	 * list. The empty result is NOT cached, so a transient outage is
+	 * retried on the next request.
+	 *
+	 * @since  1.0.0
+	 * @param  string $provider 'claude' | 'chatgpt'.
+	 * @param  bool   $force    Bypass the cache and re-query the API.
+	 * @return array<string,string> Model id => label (may be empty).
+	 */
+	public static function fetch_models( $provider, $force = false ) {
+
+		$provider  = ( 'chatgpt' === $provider ) ? 'chatgpt' : 'claude';
+		$transient = self::MODELS_TRANSIENT_PREFIX . $provider;
+
+		if ( ! $force ) {
+			$cached = get_transient( $transient );
+			if ( is_array( $cached ) ) {
+				return $cached;
+			}
+		}
+
+		$models = ( 'chatgpt' === $provider )
+			? self::list_openai_models()
+			: self::list_anthropic_models();
+
+		// Only cache non-empty results so transient failures are retried.
+		if ( ! empty( $models ) ) {
+			set_transient( $transient, $models, self::MODELS_TTL );
+		}
+
+		return $models;
+
+	}
+
+	/**
+	 * Drop the cached model lists for both providers.
+	 *
+	 * Called when the API keys change so a new key re-queries the API
+	 * instead of serving the previous (possibly empty) cached result.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function flush_models_cache() {
+
+		delete_transient( self::MODELS_TRANSIENT_PREFIX . 'claude' );
+		delete_transient( self::MODELS_TRANSIENT_PREFIX . 'chatgpt' );
+
+	}
+
+	/**
+	 * Query the Anthropic /v1/models endpoint.
+	 *
+	 * Response shape: { data: [ { id, display_name }, ... ] }.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @return array<string,string> Model id => label (empty on failure).
+	 */
+	private static function list_anthropic_models() {
+
+		$api_key = (string) Acelera_Settings::get( 'anthropic_api_key', '' );
+
+		if ( '' === $api_key ) {
+			return array();
+		}
+
+		$response = wp_remote_get(
+			'https://api.anthropic.com/v1/models?limit=1000',
+			array(
+				'timeout' => self::LIST_TIMEOUT,
+				'headers' => array(
+					'x-api-key'         => $api_key,
+					'anthropic-version' => '2023-06-01',
+				),
+			)
+		);
+
+		$data = self::parse_response( $response, 'anthropic' );
+
+		if ( is_wp_error( $data ) || empty( $data['data'] ) || ! is_array( $data['data'] ) ) {
+			return array();
+		}
+
+		$models = array();
+
+		foreach ( $data['data'] as $entry ) {
+			if ( empty( $entry['id'] ) || ! is_string( $entry['id'] ) ) {
+				continue;
+			}
+
+			$id    = $entry['id'];
+			$label = ( ! empty( $entry['display_name'] ) && is_string( $entry['display_name'] ) )
+				? $entry['display_name']
+				: $id;
+
+			$models[ $id ] = $label;
+		}
+
+		return $models;
+
+	}
+
+	/**
+	 * Query the OpenAI /v1/models endpoint.
+	 *
+	 * The endpoint returns every model (embeddings, audio, image, …),
+	 * so the list is filtered to chat-capable gpt-* / o-series families
+	 * and sorted with the newest-looking ids first.
+	 *
+	 * Response shape: { data: [ { id }, ... ] }.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @return array<string,string> Model id => label (empty on failure).
+	 */
+	private static function list_openai_models() {
+
+		$api_key = (string) Acelera_Settings::get( 'openai_api_key', '' );
+
+		if ( '' === $api_key ) {
+			return array();
+		}
+
+		$response = wp_remote_get(
+			'https://api.openai.com/v1/models',
+			array(
+				'timeout' => self::LIST_TIMEOUT,
+				'headers' => array(
+					'Authorization' => 'Bearer ' . $api_key,
+				),
+			)
+		);
+
+		$data = self::parse_response( $response, 'openai' );
+
+		if ( is_wp_error( $data ) || empty( $data['data'] ) || ! is_array( $data['data'] ) ) {
+			return array();
+		}
+
+		$ids = array();
+
+		foreach ( $data['data'] as $entry ) {
+			if ( empty( $entry['id'] ) || ! is_string( $entry['id'] ) ) {
+				continue;
+			}
+
+			if ( self::is_openai_chat_model( $entry['id'] ) ) {
+				$ids[] = $entry['id'];
+			}
+		}
+
+		sort( $ids );
+
+		$models = array();
+		foreach ( $ids as $id ) {
+			$models[ $id ] = $id; // OpenAI ids have no separate display name.
+		}
+
+		return $models;
+
+	}
+
+	/**
+	 * Whether an OpenAI model id is a chat-capable gpt/o-series model.
+	 *
+	 * Excludes embeddings, audio (whisper/tts), image (dall-e),
+	 * moderation, realtime, search/transcribe variants and dated
+	 * snapshot duplicates that only add noise to the dropdown.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  string $id Model id, e.g. 'gpt-4o-mini'.
+	 * @return bool
+	 */
+	private static function is_openai_chat_model( $id ) {
+
+		$id = strtolower( $id );
+
+		// Chat families only.
+		$is_family = ( 0 === strpos( $id, 'gpt-' ) )
+			|| (bool) preg_match( '/^o\d/', $id ); // o1, o3, o4, …
+
+		if ( ! $is_family ) {
+			return false;
+		}
+
+		// Drop non-chat / specialized variants.
+		$blocked = array( 'embedding', 'whisper', 'tts', 'audio', 'realtime', 'image', 'dall-e', 'moderation', 'transcribe', 'search', 'instruct' );
+
+		foreach ( $blocked as $needle ) {
+			if ( false !== strpos( $id, $needle ) ) {
+				return false;
+			}
+		}
+
+		return true;
 
 	}
 
