@@ -79,6 +79,18 @@ class Acelera_Clientify {
 	const TIMEOUT = 15;
 
 	/**
+	 * Fields requested on GET /contacts/ queries.
+	 *
+	 * The Clientify v2 API rejects GET /contacts/ with HTTP 400 unless a
+	 * `fields` param is supplied. We request only the fields we actually
+	 * use (id + email for the duplicate-check fallback).
+	 *
+	 * @since 1.0.0
+	 * @var   string
+	 */
+	const CONTACT_FIELDS = 'id,email';
+
+	/**
 	 * Clientify API key.
 	 *
 	 * @since  1.0.0
@@ -146,7 +158,10 @@ class Acelera_Clientify {
 			return null;
 		}
 
-		$response = $this->request( 'GET', '/contacts/?query=' . rawurlencode( $email ) );
+		$response = $this->request(
+			'GET',
+			'/contacts/?fields=' . self::CONTACT_FIELDS . '&query=' . rawurlencode( $email )
+		);
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -206,7 +221,7 @@ class Acelera_Clientify {
 			);
 		}
 
-		$response = $this->request( 'GET', '/contacts/?page_size=1' );
+		$response = $this->request( 'GET', '/contacts/?fields=' . self::CONTACT_FIELDS . '&page_size=1' );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
