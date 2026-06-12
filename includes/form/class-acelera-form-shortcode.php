@@ -125,6 +125,26 @@ class Acelera_Form_Shortcode {
 	}
 
 	/**
+	 * Cache-busting version for a plugin asset, based on its mtime.
+	 *
+	 * Production sits behind a CDN/browser caches; using filemtime makes
+	 * the ?ver= change on every deploy so clients never run stale assets.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  string $relative_path Asset path relative to the plugin root.
+	 * @return string Version string for wp_enqueue_*().
+	 */
+	private function asset_version( $relative_path ) {
+
+		$file  = plugin_dir_path( dirname( __FILE__, 2 ) ) . $relative_path;
+		$mtime = file_exists( $file ) ? filemtime( $file ) : false;
+
+		return $mtime ? $this->version . '.' . $mtime : $this->version;
+
+	}
+
+	/**
 	 * Enqueue the form assets + localized payload (render time only).
 	 *
 	 * @since  1.0.0
@@ -137,8 +157,8 @@ class Acelera_Form_Shortcode {
 		$handle = $this->plugin_name . '-form';
 		$base   = plugin_dir_url( dirname( __FILE__, 2 ) ) . 'public/';
 
-		wp_enqueue_style( $handle, $base . 'css/acelera-form.css', array(), $this->version, 'all' );
-		wp_enqueue_script( $handle, $base . 'js/acelera-form.js', array(), $this->version, true );
+		wp_enqueue_style( $handle, $base . 'css/acelera-form.css', array(), $this->asset_version( 'public/css/acelera-form.css' ), 'all' );
+		wp_enqueue_script( $handle, $base . 'js/acelera-form.js', array(), $this->asset_version( 'public/js/acelera-form.js' ), true );
 
 		$user = wp_get_current_user();
 

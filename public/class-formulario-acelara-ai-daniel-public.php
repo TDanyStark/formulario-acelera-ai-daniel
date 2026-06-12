@@ -71,6 +71,26 @@ class Formulario_Acelara_Ai_Daniel_Public {
 	}
 
 	/**
+	 * Cache-busting version for a plugin asset, based on its mtime.
+	 *
+	 * Production sits behind a CDN/browser caches; using filemtime makes
+	 * the ?ver= change on every deploy so clients never run stale assets.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @param    string $relative_path Asset path relative to the plugin root.
+	 * @return   string Version string for wp_enqueue_*().
+	 */
+	private function asset_version( $relative_path ) {
+
+		$file  = plugin_dir_path( dirname( __FILE__ ) ) . $relative_path;
+		$mtime = file_exists( $file ) ? filemtime( $file ) : false;
+
+		return $mtime ? $this->version . '.' . $mtime : $this->version;
+
+	}
+
+	/**
 	 * Register the stylesheets for the public-facing side of the site.
 	 *
 	 * Loaded only inside the ACELERA course.
@@ -83,10 +103,10 @@ class Formulario_Acelara_Ai_Daniel_Public {
 			return;
 		}
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/formulario-acelara-ai-daniel-public.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/formulario-acelara-ai-daniel-public.css', array(), $this->asset_version( 'public/css/formulario-acelara-ai-daniel-public.css' ), 'all' );
 
 		// Sidebar accordion styles (Fase 3).
-		wp_enqueue_style( $this->plugin_name . '-accordion', plugin_dir_url( __FILE__ ) . 'css/acelera-accordion.css', array( $this->plugin_name ), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name . '-accordion', plugin_dir_url( __FILE__ ) . 'css/acelera-accordion.css', array( $this->plugin_name ), $this->asset_version( 'public/css/acelera-accordion.css' ), 'all' );
 
 	}
 
@@ -103,7 +123,7 @@ class Formulario_Acelara_Ai_Daniel_Public {
 			return;
 		}
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/formulario-acelara-ai-daniel-public.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/formulario-acelara-ai-daniel-public.js', array( 'jquery' ), $this->asset_version( 'public/js/formulario-acelara-ai-daniel-public.js' ), false );
 
 		// Welcome gate data for the front-end (see gate JS in the same file).
 		// Locked lesson IDs are only sent while the gate applies; once the
@@ -126,7 +146,7 @@ class Formulario_Acelara_Ai_Daniel_Public {
 		);
 
 		// Sidebar accordion (Fase 3). Vanilla JS, loaded in the footer.
-		wp_enqueue_script( $this->plugin_name . '-accordion', plugin_dir_url( __FILE__ ) . 'js/acelera-accordion.js', array(), $this->version, true );
+		wp_enqueue_script( $this->plugin_name . '-accordion', plugin_dir_url( __FILE__ ) . 'js/acelera-accordion.js', array(), $this->asset_version( 'public/js/acelera-accordion.js' ), true );
 
 		$current_section_id = class_exists( 'Acelera_Template_Loader' )
 			? Acelera_Template_Loader::current_section_id( Acelera_Course_Map::COURSE_ID )

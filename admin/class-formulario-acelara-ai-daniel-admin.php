@@ -103,6 +103,26 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 	}
 
 	/**
+	 * Cache-busting version for a plugin asset, based on its mtime.
+	 *
+	 * Production sits behind a CDN/browser caches; using filemtime makes
+	 * the ?ver= change on every deploy so clients never run stale assets.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @param    string $relative_path Asset path relative to the plugin root.
+	 * @return   string Version string for wp_enqueue_*().
+	 */
+	private function asset_version( $relative_path ) {
+
+		$file  = plugin_dir_path( dirname( __FILE__ ) ) . $relative_path;
+		$mtime = file_exists( $file ) ? filemtime( $file ) : false;
+
+		return $mtime ? $this->version . '.' . $mtime : $this->version;
+
+	}
+
+	/**
 	 * Register the stylesheets for the admin area.
 	 *
 	 * Only enqueued on the plugin settings page.
@@ -116,7 +136,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 			return;
 		}
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/formulario-acelara-ai-daniel-admin.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/formulario-acelara-ai-daniel-admin.css', array(), $this->asset_version( 'admin/css/formulario-acelara-ai-daniel-admin.css' ), 'all' );
 
 	}
 
@@ -134,7 +154,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 			return;
 		}
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/formulario-acelara-ai-daniel-admin.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/formulario-acelara-ai-daniel-admin.js', array( 'jquery' ), $this->asset_version( 'admin/js/formulario-acelara-ai-daniel-admin.js' ), false );
 
 		wp_localize_script(
 			$this->plugin_name,
