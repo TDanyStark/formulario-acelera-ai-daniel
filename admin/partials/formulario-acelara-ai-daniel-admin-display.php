@@ -40,4 +40,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		submit_button();
 		?>
 	</form>
+
+	<?php if ( 'clientify' === $active_tab ) : ?>
+		<hr>
+		<p>
+			<button type="button" class="button" id="acelera-clientify-test">
+				<?php esc_html_e( 'Probar conexión', 'formulario-acelara-ai-daniel' ); ?>
+			</button>
+			<span id="acelera-clientify-test-result" aria-live="polite"></span>
+		</p>
+	<?php endif; ?>
 </div>

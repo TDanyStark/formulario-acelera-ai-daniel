@@ -147,12 +147,79 @@ class Acelera_Submissions_Repo {
 	}
 
 	/**
+	 * Get a submission row by ID.
+	 *
+	 * Used by the Clientify cron handler (Fase 5).
+	 *
+	 * @since  1.0.0
+	 * @param  int $id Submission row ID.
+	 * @return object|null Row object or null when not found.
+	 */
+	public function get_by_id( $id ) {
+		global $wpdb;
+
+		$table = self::table_name();
+
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$table} WHERE id = %d",
+				(int) $id
+			)
+		);
+
+		return $row ? $row : null;
+	}
+
+	/**
+	 * Get a page of submissions, newest first.
+	 *
+	 * Backs the "Sumisiones" admin list (Fase 5.3).
+	 *
+	 * @since  1.0.0
+	 * @param  int $per_page Rows per page (1–100).
+	 * @param  int $page     1-based page number.
+	 * @return object[] Row objects (possibly empty).
+	 */
+	public function get_page( $per_page = 20, $page = 1 ) {
+		global $wpdb;
+
+		$per_page = max( 1, min( 100, (int) $per_page ) );
+		$page     = max( 1, (int) $page );
+		$offset   = ( $page - 1 ) * $per_page;
+		$table    = self::table_name();
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table} ORDER BY id DESC LIMIT %d OFFSET %d",
+				$per_page,
+				$offset
+			)
+		);
+
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
+	 * Total number of submission rows (all statuses).
+	 *
+	 * @since  1.0.0
+	 * @return int
+	 */
+	public function count_all() {
+		global $wpdb;
+
+		$table = self::table_name();
+
+		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+	}
+
+	/**
 	 * Update the Clientify sync data of a submission.
 	 *
 	 * @since  1.0.0
 	 * @param  int      $id         Submission row ID.
 	 * @param  int|null $contact_id Clientify contact ID (null if not created).
-	 * @param  string   $status     Sync status: pending | sent | error.
+	 * @param  string   $status     Sync status: pending | sent | error | skipped.
 	 * @return int|false Number of rows updated, or false on failure.
 	 */
 	public function update_clientify( $id, $contact_id, $status ) {

@@ -51,6 +51,23 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 	private $settings_page_hook = '';
 
 	/**
+	 * Hook suffix of the submissions list page, set by add_settings_menu().
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $submissions_page_hook    Hook suffix returned by add_submenu_page().
+	 */
+	private $submissions_page_hook = '';
+
+	/**
+	 * Nonce action shared by the Clientify admin AJAX endpoints.
+	 *
+	 * @since    1.0.0
+	 * @var      string
+	 */
+	const CLIENTIFY_NONCE_ACTION = 'acelera_clientify_admin';
+
+	/**
 	 * Setting keys that hold API secrets and must never be printed in full.
 	 *
 	 * @since    1.0.0
@@ -83,7 +100,7 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 	 */
 	public function enqueue_styles( $hook_suffix ) {
 
-		if ( $hook_suffix !== $this->settings_page_hook ) {
+		if ( ! in_array( $hook_suffix, array( $this->settings_page_hook, $this->submissions_page_hook ), true ) ) {
 			return;
 		}
 
@@ -101,11 +118,25 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 	 */
 	public function enqueue_scripts( $hook_suffix ) {
 
-		if ( $hook_suffix !== $this->settings_page_hook ) {
+		if ( ! in_array( $hook_suffix, array( $this->settings_page_hook, $this->submissions_page_hook ), true ) ) {
 			return;
 		}
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/formulario-acelara-ai-daniel-admin.js', array( 'jquery' ), $this->version, false );
+
+		wp_localize_script(
+			$this->plugin_name,
+			'aceleraAdmin',
+			array(
+				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( self::CLIENTIFY_NONCE_ACTION ),
+				'i18n'    => array(
+					'testing'   => __( 'Probando conexión…', 'formulario-acelara-ai-daniel' ),
+					'resending' => __( 'Reprogramando…', 'formulario-acelara-ai-daniel' ),
+					'genericKo' => __( 'Error inesperado. Revisa la consola del navegador.', 'formulario-acelara-ai-daniel' ),
+				),
+			)
+		);
 
 	}
 
@@ -124,6 +155,25 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 			array( $this, 'render_settings_page' ),
 			'dashicons-welcome-learn-more',
 			58
+		);
+
+		// Mirror the default WP behavior: a submenu entry for the parent page.
+		add_submenu_page(
+			'acelera-settings',
+			__( 'Ajustes', 'formulario-acelara-ai-daniel' ),
+			__( 'Ajustes', 'formulario-acelara-ai-daniel' ),
+			'manage_options',
+			'acelera-settings'
+		);
+
+		// Submissions status list (Fase 5.3).
+		$this->submissions_page_hook = add_submenu_page(
+			'acelera-settings',
+			__( 'Sumisiones', 'formulario-acelara-ai-daniel' ),
+			__( 'Sumisiones', 'formulario-acelara-ai-daniel' ),
+			'manage_options',
+			'acelera-submissions',
+			array( $this, 'render_submissions_page' )
 		);
 
 	}
@@ -403,6 +453,105 @@ class Formulario_Acelara_Ai_Daniel_Admin {
 		$visible = strlen( $value ) > 4 ? substr( $value, -4 ) : '';
 
 		return str_repeat( "\u{2022}", 4 ) . $visible;
+
+	}
+
+	/**
+	 * Render the "Sumisiones" list page (delegates to the admin partial).
+	 *
+	 * @since    1.0.0
+	 */
+	public function render_submissions_page() {
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$per_page = 20;
+		$page     = isset( $_GET['paged'] ) ? max( 1, (int) $_GET['paged'] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		$repo        = new Acelera_Submissions_Repo();
+		$submissions = $repo->get_page( $per_page, $page );
+		$total       = $repo->count_all();
+		$total_pages = max( 1, (int) ceil( $total / $per_page ) );
+
+		include plugin_dir_path( __FILE__ ) . 'partials/formulario-acelara-ai-daniel-admin-submissions.php';
+
+	}
+
+	/**
+	 * AJAX `acelera_clientify_test` — validate the stored API key.
+	 *
+	 * @since    1.0.0
+	 */
+	public function ajax_clientify_test() {
+
+		check_ajax_referer( self::CLIENTIFY_NONCE_ACTION, 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error(
+				array( 'message' => __( 'No tienes permisos suficientes.', 'formulario-acelara-ai-daniel' ) ),
+				403
+			);
+		}
+
+		$client = new Acelera_Clientify();
+		$result = $client->test_connection();
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		}
+
+		wp_send_json_success(
+			array( 'message' => __( 'Conexión correcta con Clientify.', 'formulario-acelara-ai-daniel' ) )
+		);
+
+	}
+
+	/**
+	 * AJAX `acelera_clientify_resend` — reschedule a failed/skipped send.
+	 *
+	 * Resets the row to 'pending' (attempt 1) and clears the stored error.
+	 *
+	 * @since    1.0.0
+	 */
+	public function ajax_clientify_resend() {
+
+		check_ajax_referer( self::CLIENTIFY_NONCE_ACTION, 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error(
+				array( 'message' => __( 'No tienes permisos suficientes.', 'formulario-acelara-ai-daniel' ) ),
+				403
+			);
+		}
+
+		$submission_id = isset( $_POST['submission_id'] ) ? (int) $_POST['submission_id'] : 0;
+
+		$repo = new Acelera_Submissions_Repo();
+		$row  = $submission_id > 0 ? $repo->get_by_id( $submission_id ) : null;
+
+		if ( ! $row ) {
+			wp_send_json_error(
+				array( 'message' => __( 'La sumisión no existe.', 'formulario-acelara-ai-daniel' ) )
+			);
+		}
+
+		if ( 'sent' === (string) $row->clientify_status ) {
+			wp_send_json_error(
+				array( 'message' => __( 'Esta sumisión ya fue enviada a Clientify.', 'formulario-acelara-ai-daniel' ) )
+			);
+		}
+
+		delete_transient( Acelera_Clientify_Dispatcher::ERROR_TRANSIENT_PREFIX . $submission_id );
+
+		$repo->update_clientify( $submission_id, (int) $row->clientify_contact_id ? (int) $row->clientify_contact_id : null, 'pending' );
+
+		Acelera_Clientify_Dispatcher::schedule( $submission_id, 1, 0 );
+
+		wp_send_json_success(
+			array( 'message' => __( 'Reenvío programado.', 'formulario-acelara-ai-daniel' ) )
+		);
 
 	}
 

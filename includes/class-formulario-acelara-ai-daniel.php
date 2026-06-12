@@ -186,6 +186,13 @@ class Formulario_Acelara_Ai_Daniel {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/form/class-acelera-form-shortcode.php';
 
+		/**
+		 * Clientify CRM (Fase 5): API client (contact + note + note HTML
+		 * builder) and the async cron dispatcher with retry/backoff.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/crm/class-acelera-clientify.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/crm/class-acelera-clientify-dispatcher.php';
+
 		$this->loader = new Formulario_Acelara_Ai_Daniel_Loader();
 
 	}
@@ -224,6 +231,12 @@ class Formulario_Acelara_Ai_Daniel {
 		// Settings page (menu + Settings API registration).
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_settings_menu' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
+
+		// Clientify admin AJAX (Fase 5.3): test connection + resend.
+		// admin-ajax requests always load admin hooks, so this is the
+		// right section for them.
+		$this->loader->add_action( 'wp_ajax_acelera_clientify_test', $plugin_admin, 'ajax_clientify_test' );
+		$this->loader->add_action( 'wp_ajax_acelera_clientify_resend', $plugin_admin, 'ajax_clientify_resend' );
 
 	}
 
@@ -294,6 +307,22 @@ class Formulario_Acelara_Ai_Daniel {
 
 		$this->loader->add_filter( 'acelera_section_title', $plugin_renaming, 'filter_section_title', 10, 2 );
 		$this->loader->add_filter( 'the_title', $plugin_renaming, 'filter_the_title', 10, 2 );
+
+		// Clientify async dispatch (Fase 5). Registered here — NOT in
+		// define_admin_hooks() — because both hooks must run on non-admin
+		// requests: `acelera_form_completed` fires during the REST /submit
+		// request and `acelera_send_to_clientify` during WP-Cron requests,
+		// and the loader registers these callbacks on EVERY request type
+		// anyway (the admin/public split is organizational). Staying inside
+		// the LEARNDASH_VERSION guard is safe: the hook only ever fires
+		// from the REST endpoint, which is itself guard-registered, and LD
+		// is a hard requirement of the plugin. Worst case (LD deactivated
+		// with events still queued) pending cron events fire without a
+		// callback and are dropped silently.
+		$plugin_clientify_dispatcher = new Acelera_Clientify_Dispatcher();
+
+		$this->loader->add_action( 'acelera_form_completed', $plugin_clientify_dispatcher, 'on_form_completed', 10, 4 );
+		$this->loader->add_action( Acelera_Clientify_Dispatcher::CRON_HOOK, $plugin_clientify_dispatcher, 'handle_cron', 10, 2 );
 
 	}
 
