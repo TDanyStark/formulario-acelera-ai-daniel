@@ -116,6 +116,8 @@
 .lms-lessions-list .acelera-bb-section .ld-lesson-section-heading {
 	display: block;
 	margin: 0;
+	padding-left: 15px;
+	padding-right: 15px;
 }
 
 .lms-lessions-list .acelera-section-toggle {
