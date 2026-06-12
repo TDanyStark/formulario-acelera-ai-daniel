@@ -143,6 +143,13 @@ class Formulario_Acelara_Ai_Daniel {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/gate/class-acelera-welcome-gate.php';
 
+		/**
+		 * Template loader (Fase 3): redirects LD30 navigation widget
+		 * templates to plugin overrides inside the ACELERA course and
+		 * provides the sidebar accordion grouping helpers.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-acelera-template-loader.php';
+
 		$this->loader = new Formulario_Acelara_Ai_Daniel_Loader();
 
 	}
@@ -222,6 +229,13 @@ class Formulario_Acelara_Ai_Daniel {
 
 		// Free-mode compatibility: immediate unlock when a lesson completes.
 		$this->loader->add_action( 'learndash_lesson_completed', $plugin_public, 'gate_on_lesson_completed', 10, 1 );
+
+		// Sidebar accordion (Fase 3): LD30 navigation widget template
+		// overrides, ACELERA course only. Priority 999 so the plugin wins
+		// over theme `learndash/` folder overrides (plan risk note).
+		$plugin_template_loader = new Acelera_Template_Loader();
+
+		$this->loader->add_filter( 'learndash_template', $plugin_template_loader, 'filter_template', 999, 5 );
 
 	}
 

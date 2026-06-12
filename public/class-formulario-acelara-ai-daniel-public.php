@@ -81,6 +81,9 @@ class Formulario_Acelara_Ai_Daniel_Public {
 
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/formulario-acelara-ai-daniel-public.css', array(), $this->version, 'all' );
 
+		// Sidebar accordion styles (Fase 3).
+		wp_enqueue_style( $this->plugin_name . '-accordion', plugin_dir_url( __FILE__ ) . 'css/acelera-accordion.css', array( $this->plugin_name ), $this->version, 'all' );
+
 	}
 
 	/**
@@ -115,6 +118,22 @@ class Formulario_Acelara_Ai_Daniel_Public {
 			array(
 				'lockedLessons' => $locked_lessons,
 				'tooltip'       => __( 'Completa Bienvenida primero', 'formulario-acelara-ai-daniel' ),
+			)
+		);
+
+		// Sidebar accordion (Fase 3). Vanilla JS, loaded in the footer.
+		wp_enqueue_script( $this->plugin_name . '-accordion', plugin_dir_url( __FILE__ ) . 'js/acelera-accordion.js', array(), $this->version, true );
+
+		$current_section_id = class_exists( 'Acelera_Template_Loader' )
+			? Acelera_Template_Loader::current_section_id( Acelera_Course_Map::COURSE_ID )
+			: '';
+
+		wp_localize_script(
+			$this->plugin_name . '-accordion',
+			'aceleraAccordion',
+			array(
+				'courseId'         => Acelera_Course_Map::COURSE_ID,
+				'currentSectionId' => (string) $current_section_id,
 			)
 		);
 
